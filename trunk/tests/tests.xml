@@ -438,13 +438,6 @@
 		<sourcelink>http://www.linuxjournal.com/article/9585</sourcelink>
 	</test>
 	<test>
-		<address>\$A12345@example.com</address>
-		<valid>false</valid>
-		<reason>Contains an unescaped slash (I disagree with Doug here)</reason>
-		<source>Doug Lovell (LinuxJournal, June 2007)</source>
-		<sourcelink>http://www.linuxjournal.com/article/9585</sourcelink>
-	</test>
-	<test>
 		<address>!def!xyz%abc@example.com</address>
 		<valid>true</valid>
 		<source>Doug Lovell (LinuxJournal, June 2007)</source>

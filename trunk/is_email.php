@@ -4,7 +4,7 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Version 0.5
+Version 0.6
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
@@ -155,112 +155,5 @@ function is_email ($email, $checkDNS = false) {
 		//		(Sherlock Holmes, The Sign of Four)
 		return true;
 	}
-}
-
-function unitTest ($email, $reason = '') {
-	$expected	= ($reason === '') ? true : false;
-	$valid		= is_email($email);
-	$not		= ($valid) ? '' : ' not';
-	$unexpected	= ($valid !== $expected) ? ' <b>This was unexpected!</b>' : '';
-	$reason		= ($reason === '') ? "" : " Reason: $reason";
-	
-	return "The address <i>$email</i> is$not valid.$unexpected$reason<br />\n";
-}
-
-function runTests () {
-	//	Email validator test cases (Dominic Sayers, January 2009)
-	//	Valid addresses
-	echo unitTest('first.last@example.com');
-	echo unitTest('1234567890123456789012345678901234567890123456789012345678901234@example.com');
-	echo unitTest('"first last"@example.com');
-	echo unitTest('"first\\"last"@example.com');	//	Not totally sure whether this is valid or not
-	echo unitTest('first\\@last@example.com');
-	echo unitTest('"first@last"@example.com');
-	echo unitTest('first\\\\last@example.com');	//	Note that \ is escaped even in single-quote strings, so this is testing "first\\last"@example.com
-	echo unitTest('first.last@x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x2345');
-	echo unitTest('first.last@[12.34.56.78]');
-	echo unitTest('first.last@[IPv6:::12.34.56.78]');
-	echo unitTest('first.last@[IPv6:1111:2222:3333::4444:12.34.56.78]');
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666:12.34.56.78]');
-	echo unitTest('first.last@[IPv6:::1111:2222:3333:4444:5555:6666]');
-	echo unitTest('first.last@[IPv6:1111:2222:3333::4444:5555:6666]');
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666::]');
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666:7777:8888]');
-	echo unitTest('first.last@x23456789012345678901234567890123456789012345678901234567890123.example.com');
-	echo unitTest('first.last@1xample.com');
-	echo unitTest('first.last@123.example.com');
-	
-	//	Invalid addresses
-	echo unitTest('first.last', "No @");
-	echo unitTest('@example.com', "No local part");
-	echo unitTest('12345678901234567890123456789012345678901234567890123456789012345@example.com', "Local part more than 64 characters");
-	echo unitTest('.first.last@example.com', "Local part starts with a dot");
-	echo unitTest('first.last.@example.com', "Local part ends with a dot");
-	echo unitTest('first..last@example.com', "Local part has consecutive dots");
-	echo unitTest('"first"last"@example.com', "Local part contains unescaped excluded characters");
-	echo unitTest('first\\\\@last@example.com', "Local part contains unescaped excluded characters");
-	echo unitTest('first.last@', "No domain");
-	echo unitTest('first.last@x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456', "Domain exceeds 255 chars");
-	echo unitTest('first.last@[.12.34.56.78]', "Only char that can precede IPv4 address is ':'");
-	echo unitTest('first.last@[12.34.56.789]', "Can't be interpreted as IPv4 so IPv6 tag is missing");
-	echo unitTest('first.last@[::12.34.56.78]', "IPv6 tag is missing");
-	echo unitTest('first.last@[IPv5:::12.34.56.78]', "IPv6 tag is wrong");
-	echo unitTest('first.last@[IPv6:1111:2222:3333::4444:5555:12.34.56.78]', "Too many IPv6 groups (4 max)");
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:12.34.56.78]', "Not enough IPv6 groups");
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666:7777:12.34.56.78]', "Too many IPv6 groups (6 max)");
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666:7777]', "Not enough IPv6 groups");
-	echo unitTest('first.last@[IPv6:1111:2222:3333:4444:5555:6666:7777:8888:9999]', "Too many IPv6 groups (8 max)");
-	echo unitTest('first.last@[IPv6:1111:2222::3333::4444:5555:6666]', "Too many '::' (can be none or one)");
-	echo unitTest('first.last@[IPv6:1111:2222:3333::4444:5555:6666:7777]', "Too many IPv6 groups (6 max)");
-	echo unitTest('first.last@[IPv6:1111:2222:333x::4444:5555]', "x is not valid in an IPv6 address");
-	echo unitTest('first.last@[IPv6:1111:2222:33333::4444:5555]', "33333 is not a valid group in an IPv6 address");
-	echo unitTest('first.last@example.123', "TLD can't be all digits");
-	echo unitTest('first.last@com', "Mail host must be second- or lower level");
-	echo unitTest('first.last@-xample.com', "Label can't begin with a hyphen");
-	echo unitTest('first.last@exampl-.com', "Label can't end with a hyphen");
-	echo unitTest('first.last@x234567890123456789012345678901234567890123456789012345678901234.example.com', "Label can't be longer than 63 octets");
-	
-	//	Test cases from RFC3696 (February 2004, http://tools.ietf.org/html/rfc3696#section-3)
-	echo unitTest('Abc\\@def@example.com');
-	echo unitTest('Fred\\ Bloggs@example.com');
-	echo unitTest('Joe.\\\\Blow@example.com');
-	echo unitTest('"Abc@def"@example.com');
-	echo unitTest('"Fred Bloggs"@example.com');
-	echo unitTest('user+mailbox@example.com');
-	echo unitTest('customer/department=shipping@example.com');
-	echo unitTest('$A12345@example.com');
-	echo unitTest('!def!xyz%abc@example.com');
-	echo unitTest('_somename@example.com');
-	
-	//	Test cases from Doug Lovell (LinuxJournal, June 2007, http://www.linuxjournal.com/article/9585)
-	echo unitTest("dclo@us.ibm.com");
-	echo unitTest("abc\\@def@example.com");
-	echo unitTest("abc\\\\@example.com");
-	echo unitTest("Fred\\ Bloggs@example.com");
-	echo unitTest("Joe.\\\\Blow@example.com");
-	echo unitTest("\"Abc@def\"@example.com");
-	echo unitTest("\"Fred Bloggs\"@example.com");
-	echo unitTest("customer/department=shipping@example.com");
-	echo unitTest("\$A12345@example.com");
-	echo unitTest("!def!xyz%abc@example.com");
-	echo unitTest("_somename@example.com");
-	echo unitTest("user+mailbox@example.com");
-	echo unitTest("peter.piper@example.com");
-	echo unitTest("Doug\\ \\\"Ace\\\"\\ Lovell@example.com");
-	echo unitTest("\"Doug \\\"Ace\\\" L.\"@example.com");
-	echo unitTest("abc@def@example.com", "Doug Lovell says this should fail");
-	echo unitTest("abc\\\\@def@example.com", "Doug Lovell says this should fail");
-	echo unitTest("abc\\@example.com", "Doug Lovell says this should fail");
-	echo unitTest("@example.com", "Doug Lovell says this should fail");
-	echo unitTest("doug@", "Doug Lovell says this should fail");
-	echo unitTest("\"qu@example.com", "Doug Lovell says this should fail");
-	echo unitTest("ote\"@example.com", "Doug Lovell says this should fail");
-	echo unitTest(".dot@example.com", "Doug Lovell says this should fail");
-	echo unitTest("dot.@example.com", "Doug Lovell says this should fail");
-	echo unitTest("two..dot@example.com", "Doug Lovell says this should fail");
-	echo unitTest("\"Doug \"Ace\" L.\"@example.com", "Doug Lovell says this should fail");
-	echo unitTest("Doug\\ \\\"Ace\\\"\\ L\\.@example.com", "Doug Lovell says this should fail");
-	echo unitTest("hello world@example.com", "Doug Lovell says this should fail");
-	echo unitTest("gatsby@f.sc.ot.t.f.i.tzg.era.l.d.", "Doug Lovell says this should fail");
 }
 ?>
