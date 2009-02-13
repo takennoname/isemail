@@ -26,13 +26,13 @@ p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;paddi
 <?php
 require_once '..\is_email.php';
 
-function unitTest (\$email, \$expected, \$reason = '') {
+function unitTest (\$email, \$expected, \$comment = '') {
 	\$valid		= is_email(\$email);
 	\$not		= (\$valid) ? '' : ' not';
 	\$unexpected	= (\$valid !== \$expected) ? ' <b>This was unexpected!</b>' : '';
-	\$reason		= (\$reason === '') ? "" : " Reason: \$reason";
+	\$comment		= (\$comment === '') ? "" : " Comment: \$comment";
 	
-	return "The address <i>\$email</i> is\$not valid.\$unexpected\$reason<br />\n";
+	return "The address <i>\$email</i> is\$not valid.\$unexpected\$comment<br />\n";
 }
 
 
@@ -48,7 +48,7 @@ for ($i = 0; $i < $testList->length; $i++) {
 
 	unset($address);
 	unset($valid);
-	unset($reason);
+	unset($comment);
 
 	for ($j = 0; $j < $tagList->length; $j++) {
 		$node = $tagList->item($j);
@@ -61,10 +61,10 @@ for ($i = 0; $i < $testList->length; $i++) {
 	$expected	= ($valid === 'true') ? true : false; // debug
 	$address	= addslashes($address);
 	$address	= str_replace('$', '\\$', $address);
-	$reason		= addslashes($reason);
-	$reason		= str_replace('$', '\\$', $reason);
+	$comment		= addslashes($comment);
+	$comment		= str_replace('$', '\\$', $comment);
 
-	$php .= "echo '<p>' . unitTest(\"$address\", $valid, \"$reason\") . \"</p>\\n\";\n";
+	$php .= "echo '<p>' . unitTest(\"$address\", $valid, \"$comment\") . \"</p>\\n\";\n";
 }
 
 //	Bottom of PHP script

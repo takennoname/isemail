@@ -4,7 +4,7 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Version 0.6
+Version 0.8
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
@@ -12,6 +12,7 @@ The license terms are available through the world-wide-web at http://www.opensou
 function is_email ($email, $checkDNS = false) {
 	//	Check that $email is a valid address
 	//		(http://tools.ietf.org/html/rfc3696)
+	//		(http://tools.ietf.org/html/rfc2822)
 	//		(http://tools.ietf.org/html/rfc5322#section-3.4.1)
 	//		(http://tools.ietf.org/html/rfc5321#section-4.1.3)
 	//		(http://tools.ietf.org/html/rfc4291#section-2.2)
@@ -39,20 +40,31 @@ function is_email ($email, $checkDNS = false) {
 
 	//	Let's check the local part for RFC compliance...
 	//
-	//	Period (".") may...appear, but may not be used to start or end the
-	//	local part, nor may two or more consecutive periods appear.
-	//		(http://tools.ietf.org/html/rfc3696#section-3)
-	if (preg_match('/^\\.|\\.\\.|\\.$/', $localPart) > 0)				return false;	//	Dots in wrong place
-
 	//	Any ASCII graphic (printing) character other than the
 	//	at-sign ("@"), backslash, double quote, comma, or square brackets may
 	//	appear without quoting.  If any of that list of excluded characters
 	//	are to appear, they must be quoted
 	//		(http://tools.ietf.org/html/rfc3696#section-3)
 	if (preg_match('/^"(?:.)*"$/', $localPart) > 0) {
-		//	Local part is a quoted string
-		if (preg_match('/(?:.)+[^\\\\]"(?:.)+/', $localPart) > 0)		return false;	//	Unescaped quote character inside quoted string
+		//	Quoted-string tests:
+		//
+		//	Note that since quoted-pair
+		//	is allowed in a quoted-string, the quote and backslash characters may
+		//	appear in a quoted-string so long as they appear as a quoted-pair.
+		//		(http://tools.ietf.org/html/rfc2822#section-3.2.5)
+		$groupCount	= preg_match_all('/(?:^"|"$|\\\\\\\\|\\\\")|(\\\\|")/', $localPart, $matches);
+		array_multisort($matches[1], SORT_DESC);
+		if ($matches[1][0] !== '')										return false;	//	Unescaped quote or backslash character inside quoted string
+		if (preg_match('/^"\\\\*"$/', $localPart) > 0)					return false;	//	"" and "\" are slipping through - must tidy this up
 	} else {
+		//	Unquoted string tests:
+		//
+		//	Period (".") may...appear, but may not be used to start or end the
+		//	local part, nor may two or more consecutive periods appear.
+		//		(http://tools.ietf.org/html/rfc3696#section-3)
+		if (preg_match('/^\\.|\\.\\.|\\.$/', $localPart) > 0)			return false;	//	Dots in wrong place
+
+		//	Any excluded characters? i.e. <space>, @, [, ], \, ", <comma>
 		if (preg_match('/[ @\\[\\]\\\\",]/', $localPart) > 0)
 			//	Check all excluded characters are escaped
 			$stripped = preg_replace('/\\\\[ @\\[\\]\\\\",]/', '', $localPart);
@@ -105,8 +117,9 @@ function is_email ($email, $checkDNS = false) {
 		}
 
 		//	Check for unmatched characters
-		array_multisort($matchesIP[1], SORT_DESC);
-		if ($matchesIP[1][0] !== '')									return false;	//	Illegal characters in address
+		array_multisort($matchesIP
+[1], SORT_DESC);
+		if ($matchesIP[1][0] !== '')								return false;	//	Illegal characters in address
 
 		//	It's a valid IPv6 address, so...
 		return true;
@@ -142,7 +155,7 @@ function is_email ($email, $checkDNS = false) {
 
 		//	Check for unmatched characters
 		array_multisort($matches[1], SORT_DESC);
-		if ($matches[1][0] !== '')							return false;	//	Illegal characters in domain, or label longer than 63 characters
+		if ($matches[1][0] !== '')									return false;	//	Illegal characters in domain, or label longer than 63 characters
 
 		//	Check DNS?
 		if ($checkDNS && function_exists('checkdnsrr')) {
