@@ -6,7 +6,7 @@
 <title>is_email() - Run unit tests</title>
 
 <style type="text/css">
-p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;overflow:hidden;}
+p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;}
 </style>
 </head>
 
@@ -14,13 +14,13 @@ p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;paddi
 <?php
 require_once '..\is_email.php';
 
-function unitTest ($email, $expected, $reason = '') {
+function unitTest ($email, $expected, $comment = '') {
 	$valid		= is_email($email);
 	$not		= ($valid) ? '' : ' not';
 	$unexpected	= ($valid !== $expected) ? ' <b>This was unexpected!</b>' : '';
-	$reason		= ($reason === '') ? "" : " Reason: $reason";
+	$comment		= ($comment === '') ? "" : " Comment: $comment";
 	
-	return "The address <i>$email</i> is$not valid.$unexpected$reason<br />
+	return "The address <i>$email</i> is$not valid.$unexpected$comment<br />
 ";
 }
 
@@ -46,12 +46,15 @@ echo '<p>' . unitTest("first.last@1xample.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("first.last@123.example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("123456789012345678901234567890123456789012345678901234567890@12345678901234567890123456789012345678901234567890123456789.12345678901234567890123456789012345678901234567890123456789.12345678901234567890123456789012345678901234567890123456789.1234.example.com", false, "Entire address is longer than 256 characters") . "</p>\n";
 echo '<p>' . unitTest("first.last", false, "No @") . "</p>\n";
-echo '<p>' . unitTest("@example.com", false, "No local part") . "</p>\n";
 echo '<p>' . unitTest("12345678901234567890123456789012345678901234567890123456789012345@example.com", false, "Local part more than 64 characters") . "</p>\n";
 echo '<p>' . unitTest(".first.last@example.com", false, "Local part starts with a dot") . "</p>\n";
 echo '<p>' . unitTest("first.last.@example.com", false, "Local part ends with a dot") . "</p>\n";
 echo '<p>' . unitTest("first..last@example.com", false, "Local part has consecutive dots") . "</p>\n";
 echo '<p>' . unitTest("\"first\"last\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
+echo '<p>' . unitTest("\"first\\last\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
+echo '<p>' . unitTest("\"\"\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
+echo '<p>' . unitTest("\"\\\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
+echo '<p>' . unitTest("\"\"@example.com", false, "Local part is effectively empty") . "</p>\n";
 echo '<p>' . unitTest("first\\\\@last@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
 echo '<p>' . unitTest("first.last@", false, "No domain") . "</p>\n";
 echo '<p>' . unitTest("x@x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456789.x23456", false, "Domain exceeds 255 chars") . "</p>\n";
@@ -86,22 +89,13 @@ echo '<p>' . unitTest("_somename@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("dclo@us.ibm.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("abc\\@def@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("abc\\\\@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("Fred\\ Bloggs@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("Joe.\\\\Blow@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("\"Abc@def\"@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("\"Fred Bloggs\"@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("customer/department=shipping@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("\$A12345@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("!def!xyz%abc@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("_somename@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("user+mailbox@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("peter.piper@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("Doug\\ \\\"Ace\\\"\\ Lovell@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"Doug \\\"Ace\\\" L.\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("abc@def@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
 echo '<p>' . unitTest("abc\\\\@def@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
 echo '<p>' . unitTest("abc\\@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
-echo '<p>' . unitTest("@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
+echo '<p>' . unitTest("@example.com", false, "No local part") . "</p>\n";
 echo '<p>' . unitTest("doug@", false, "Doug Lovell says this should fail") . "</p>\n";
 echo '<p>' . unitTest("\"qu@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
 echo '<p>' . unitTest("ote\"@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
@@ -123,7 +117,7 @@ echo '<p>' . unitTest("{_test_}@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"[[ test ]]\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("test.test@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"test.test\"@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("test.\"test\"@example.com", false, "Quoted string must be entire local part (RFC2822 Section 3.4.1). I disagree with Dave Child on this one.") . "</p>\n";
+echo '<p>' . unitTest("test.\"test\"@example.com", true, "Obsolete form, but documented in RFC2822") . "</p>\n";
 echo '<p>' . unitTest("\"test@test\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("test@123.123.123.x123", true, "") . "</p>\n";
 echo '<p>' . unitTest("test@123.123.123.123", false, "Top Level Domain won\'t be all-numeric (see RFC3696 Section 2). I disagree with Dave Child on this one.") . "</p>\n";
@@ -138,7 +132,7 @@ echo '<p>' . unitTest("test@test@example.com", false, "") . "</p>\n";
 echo '<p>' . unitTest("test@@example.com", false, "") . "</p>\n";
 echo '<p>' . unitTest("-- test --@example.com", false, "No spaces allowed in local part") . "</p>\n";
 echo '<p>' . unitTest("[test]@example.com", false, "Square brackets only allowed within quotes") . "</p>\n";
-echo '<p>' . unitTest("\"test\\test\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("\"test\\test\"@example.com", false, "") . "</p>\n";
 echo '<p>' . unitTest("\"test\"test\"@example.com", false, "Quotes cannot be nested") . "</p>\n";
 echo '<p>' . unitTest("()[]\\;:,><@example.com", false, "Disallowed Characters") . "</p>\n";
 echo '<p>' . unitTest("test@.", false, "Dave Child says so") . "</p>\n";
@@ -148,6 +142,27 @@ echo '<p>' . unitTest("test@1234567890123456789012345678901234567890123456789012
 echo '<p>' . unitTest("test@example", false, "Dave Child says so") . "</p>\n";
 echo '<p>' . unitTest("test@[123.123.123.123", false, "Dave Child says so") . "</p>\n";
 echo '<p>' . unitTest("test@123.123.123.123]", false, "Dave Child says so") . "</p>\n";
+echo '<p>' . unitTest("NotAnEmail", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("@NotAnEmail", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("\"test\\\\blah\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("\"test\\blah\"@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("\"test\\blah\"@example.com", false, "") . "</p>\n";
+echo '<p>' . unitTest("\"testblah\"@example.com", true, "Disagree with Phil Haack here - I think this is a valid quoted string with folding white space") . "</p>\n";
+echo '<p>' . unitTest("\"test\\\"blah\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("\"test\"blah\"@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("customer/department@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("_Yosemite.Sam@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("~@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest(".wooly@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("wo..oly@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("pootietang.@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest(".@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("\"Austin@Powers\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("Ima.Fool@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("\"Ima.Fool\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("\"Ima Fool\"@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("Ima Fool@example.com", false, "Phil Haack says so") . "</p>\n";
+echo '<p>' . unitTest("phil.h\\@\\@ck@haacked.com", true, "") . "</p>\n";
 ?>
 </body>
 
