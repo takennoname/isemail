@@ -4,7 +4,7 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Version 0.8
+Version 1.0
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
@@ -17,7 +17,7 @@ function is_email ($email, $checkDNS = false) {
 	//		(http://tools.ietf.org/html/rfc5321#section-4.1.3)
 	//		(http://tools.ietf.org/html/rfc4291#section-2.2)
 	//		(http://tools.ietf.org/html/rfc1123#section-2.1)
-
+	
 	//	the upper limit on address lengths should normally be considered to be 256
 	//		(http://www.rfc-editor.org/errata_search.php?rfc=3696)
 	if (strlen($email) > 256)	return false;	//	Too long
@@ -40,35 +40,52 @@ function is_email ($email, $checkDNS = false) {
 
 	//	Let's check the local part for RFC compliance...
 	//
-	//	Any ASCII graphic (printing) character other than the
-	//	at-sign ("@"), backslash, double quote, comma, or square brackets may
-	//	appear without quoting.  If any of that list of excluded characters
-	//	are to appear, they must be quoted
-	//		(http://tools.ietf.org/html/rfc3696#section-3)
+	//	local-part      =       dot-atom / quoted-string / obs-local-part
+	//	obs-local-part  =       word *("." word)
+	//		(http://tools.ietf.org/html/rfc2822#section-3.4.1)
 	if (preg_match('/^"(?:.)*"$/', $localPart) > 0) {
-		//	Quoted-string tests:
-		//
-		//	Note that since quoted-pair
-		//	is allowed in a quoted-string, the quote and backslash characters may
-		//	appear in a quoted-string so long as they appear as a quoted-pair.
-		//		(http://tools.ietf.org/html/rfc2822#section-3.2.5)
-		$groupCount	= preg_match_all('/(?:^"|"$|\\\\\\\\|\\\\")|(\\\\|")/', $localPart, $matches);
-		array_multisort($matches[1], SORT_DESC);
-		if ($matches[1][0] !== '')										return false;	//	Unescaped quote or backslash character inside quoted string
-		if (preg_match('/^"\\\\*"$/', $localPart) > 0)					return false;	//	"" and "\" are slipping through - must tidy this up
+		$dotArray[]	= $localPart;
 	} else {
-		//	Unquoted string tests:
-		//
+		$dotArray	= explode('.', $localPart);
+	}
+	
+	foreach ($dotArray as $localElement) {
 		//	Period (".") may...appear, but may not be used to start or end the
 		//	local part, nor may two or more consecutive periods appear.
 		//		(http://tools.ietf.org/html/rfc3696#section-3)
-		if (preg_match('/^\\.|\\.\\.|\\.$/', $localPart) > 0)			return false;	//	Dots in wrong place
+		//
+		//	A zero-length element implies a period at the beginning or end of the
+		//	local part, or two periods together. Either way it's not allowed.
+		if ($localElement === '')										return false;	//	Dots in wrong place
 
-		//	Any excluded characters? i.e. <space>, @, [, ], \, ", <comma>
-		if (preg_match('/[ @\\[\\]\\\\",]/', $localPart) > 0)
-			//	Check all excluded characters are escaped
-			$stripped = preg_replace('/\\\\[ @\\[\\]\\\\",]/', '', $localPart);
-			if (preg_match('/[ @\\[\\]\\\\",]/', $stripped) > 0)		return false;	//	Unquoted excluded characters
+		//	Each dot-delimited component can be an atom or a quoted string
+		//	(because of the obs-local-part provision)
+		if (preg_match('/^"(?:.)*"$/', $localElement) > 0) {
+			//	Quoted-string tests:
+			//
+			//	Note that since quoted-pair
+			//	is allowed in a quoted-string, the quote and backslash characters may
+			//	appear in a quoted-string so long as they appear as a quoted-pair.
+			//		(http://tools.ietf.org/html/rfc2822#section-3.2.5)
+			$groupCount	= preg_match_all('/(?:^"|"$|\\\\\\\\|\\\\")|(\\\\|")/', $localElement, $matches);
+			array_multisort($matches[1], SORT_DESC);
+			if ($matches[1][0] !== '')									return false;	//	Unescaped quote or backslash character inside quoted string
+			if (preg_match('/^"\\\\*"$/', $localElement) > 0)			return false;	//	"" and "\" are slipping through - note: must tidy this up
+		} else {
+			//	Unquoted string tests:
+			//
+			//	Any ASCII graphic (printing) character other than the
+			//	at-sign ("@"), backslash, double quote, comma, or square brackets may
+			//	appear without quoting.  If any of that list of excluded characters
+			//	are to appear, they must be quoted
+			//		(http://tools.ietf.org/html/rfc3696#section-3)
+			//
+			//	Any excluded characters? i.e. <space>, @, [, ], \, ", <comma>
+			if (preg_match('/[ @\\[\\]\\\\",]/', $localElement) > 0)
+				//	Check all excluded characters are escaped
+				$stripped = preg_replace('/\\\\[ @\\[\\]\\\\",]/', '', $localElement);
+				if (preg_match('/[ @\\[\\]\\\\",]/', $stripped) > 0)	return false;	//	Unquoted excluded characters
+		}
 	}
 
 	//	Now let's check the domain part...
