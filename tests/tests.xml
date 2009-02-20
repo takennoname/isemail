@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tests version="0.8">
+<tests version="1.0">
 	<test>
 		<address>first.last@example.com</address>
 		<valid>true</valid>
