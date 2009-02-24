@@ -53,7 +53,7 @@ echo '<p>' . unitTest("first..last@example.com", false, "Local part has consecut
 echo '<p>' . unitTest("\"first\"last\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
 echo '<p>' . unitTest("\"first\\last\"@example.com", true, "Any character can be escaped in a quoted string") . "</p>\n";
 echo '<p>' . unitTest("\"\"\"@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
-echo '<p>' . unitTest("\"\\\"@example.com", false, "Local part is effectively empty") . "</p>\n";
+echo '<p>' . unitTest("\"\\\"@example.com", false, "Local part cannot end with a backslash") . "</p>\n";
 echo '<p>' . unitTest("\"\"@example.com", false, "Local part is effectively empty") . "</p>\n";
 echo '<p>' . unitTest("first\\\\@last@example.com", false, "Local part contains unescaped excluded characters") . "</p>\n";
 echo '<p>' . unitTest("first.last@", false, "No domain") . "</p>\n";
@@ -87,10 +87,10 @@ echo '<p>' . unitTest("\$A12345@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("!def!xyz%abc@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("_somename@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("dclo@us.ibm.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("abc\\@def@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("abc\\\\@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("abc\\@def@example.com", false, "This example from RFC3696 was corrected in an erratum") . "</p>\n";
+echo '<p>' . unitTest("abc\\\\@example.com", false, "This example from RFC3696 was corrected in an erratum") . "</p>\n";
 echo '<p>' . unitTest("peter.piper@example.com", true, "") . "</p>\n";
-echo '<p>' . unitTest("Doug\\ \\\"Ace\\\"\\ Lovell@example.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("Doug\\ \\\"Ace\\\"\\ Lovell@example.com", false, "Escaping can only happen in a quoted string") . "</p>\n";
 echo '<p>' . unitTest("\"Doug \\\"Ace\\\" L.\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("abc@def@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
 echo '<p>' . unitTest("abc\\\\@def@example.com", false, "Doug Lovell says this should fail") . "</p>\n";
@@ -146,8 +146,8 @@ echo '<p>' . unitTest("NotAnEmail", false, "Phil Haack says so") . "</p>\n";
 echo '<p>' . unitTest("@NotAnEmail", false, "Phil Haack says so") . "</p>\n";
 echo '<p>' . unitTest("\"test\\\\blah\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"test\\blah\"@example.com", true, "Any character can be escaped in a quoted string") . "</p>\n";
-echo '<p>' . unitTest("\"test\\blah\"@example.com", true, "Any character can be escaped in a quoted string") . "</p>\n";
-echo '<p>' . unitTest("\"testblah\"@example.com", true, "Disagree with Phil Haack here - I think this is a valid quoted string with folding white space") . "</p>\n";
+echo '<p>' . unitTest("\"test\\blah\"@example.com", true, "Quoted string specifically excludes carriage returns unless escaped") . "</p>\n";
+echo '<p>' . unitTest("\"testblah\"@example.com", False, "Quoted string specifically excludes carriage returns") . "</p>\n";
 echo '<p>' . unitTest("\"test\\\"blah\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"test\"blah\"@example.com", false, "Phil Haack says so") . "</p>\n";
 echo '<p>' . unitTest("customer/department@example.com", true, "") . "</p>\n";
@@ -162,7 +162,7 @@ echo '<p>' . unitTest("Ima.Fool@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"Ima.Fool\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"Ima Fool\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("Ima Fool@example.com", false, "Phil Haack says so") . "</p>\n";
-echo '<p>' . unitTest("phil.h\\@\\@ck@haacked.com", true, "") . "</p>\n";
+echo '<p>' . unitTest("phil.h\\@\\@ck@haacked.com", false, "Escaping can only happen in a quoted string") . "</p>\n";
 echo '<p>' . unitTest("\"first\".\"last\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"first\".middle.\"last\"@example.com", true, "") . "</p>\n";
 echo '<p>' . unitTest("\"first\\\\\"last\"@example.com", false, "Contains an unescaped quote") . "</p>\n";
@@ -178,9 +178,15 @@ echo '<p>' . unitTest("first.\"mid\\dle\".\"last\"@example.com", true, "Backslas
 echo '<p>' . unitTest("\"first\\\\\"last\"@example.com", false, "Contains an unescaped quote") . "</p>\n";
 echo '<p>' . unitTest("first.\"\".last@example.com", false, "Contains a zero-length element") . "</p>\n";
 echo '<p>' . unitTest("first\\last@example.com", false, "Unquoted string must be an atom") . "</p>\n";
-echo '<p>' . unitTest("Abc\\@def@example.com", false, "") . "</p>\n";
-echo '<p>' . unitTest("Fred\\ Bloggs@example.com", false, "") . "</p>\n";
-echo '<p>' . unitTest("Joe.\\\\Blow@example.com", false, "") . "</p>\n";
+echo '<p>' . unitTest("Abc\\@def@example.com", false, "Was incorrectly given as a valid address in the original RFC3696") . "</p>\n";
+echo '<p>' . unitTest("Fred\\ Bloggs@example.com", false, "Was incorrectly given as a valid address in the original RFC3696") . "</p>\n";
+echo '<p>' . unitTest("Joe.\\\\Blow@example.com", false, "Was incorrectly given as a valid address in the original RFC3696") . "</p>\n";
+echo '<p>' . unitTest("first.last@[IPv6:1111:2222:3333:4444:5555:6666:12.34.567.89]", false, "IPv4 part contains an invalid octet") . "</p>\n";
+echo '<p>' . unitTest("\"test\\
+ blah\"@example.com", true, "Folding white space can appear in a quoted string") . "</p>\n";
+echo '<p>' . unitTest("\"test
+ blah\"@example.com", true, "Disagree with Phil Haack here - I think this is a valid quoted string with folding white space") . "</p>\n";
+echo '<p>' . unitTest("{^c\\@**Dog^}@cartoon.com", False, "This is a throwaway example from Doug Lovell\'s article. Actually it\'s not a valid address.") . "</p>\n";
 ?>
 </body>
 
