@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<title>The BNF from RFC5322 defining parts of a valid email address</title>
+</head>
+
+<body>
+<pre style="font-size:11px;">
+   addr-spec       =   local-part "@" domain
+
+   local-part      =   dot-atom / quoted-string / obs-local-part
+
+   dot-atom        =   [CFWS] dot-atom-text [CFWS]
+
+   dot-atom-text   =   1*atext *("." 1*atext)
+
+   atext           =   ALPHA / DIGIT /    ; Printable US-ASCII
+                       "!" / "#" /        ;  characters not including
+                       "$" / "%" /        ;  specials.  Used for atoms.
+                       "&amp;" / "'" /
+                       "*" / "+" /
+                       "-" / "/" /
+                       "=" / "?" /
+                       "^" / "_" /
+                       "`" / "{" /
+                       "|" / "}" /
+                       "~"
+
+   specials        =   "(" / ")" /        ; Special characters that do
+                       "&lt;" / "&gt;" /        ;  not appear in atext
+                       "[" / "]" /
+                       ":" / ";" /
+                       "@" / "\" /
+                       "," / "." /
+                       DQUOTE
+
+   quoted-string   =   [CFWS]
+                       DQUOTE *([FWS] qcontent) [FWS] DQUOTE
+                       [CFWS]
+
+   FWS             =   ([*WSP CRLF] 1*WSP) /  obs-FWS
+                                          ; Folding white space
+
+   WSP             =   SP / HTAB          ; white space
+
+   obs-FWS         =   1*WSP *(CRLF 1*WSP)
+
+   qcontent        =   qtext / quoted-pair
+
+   qtext           =   %d33 /             ; Printable US-ASCII
+                       %d35-91 /          ;  characters not including
+                       %d93-126 /         ;  "\" or the quote character
+                       obs-qtext
+
+   obs-qtext       =   obs-NO-WS-CTL
+
+   obs-NO-WS-CTL   =   %d1-8 /            ; US-ASCII control
+                       %d11 /             ;  characters that do not
+                       %d12 /             ;  include the carriage
+                       %d14-31 /          ;  return, line feed, and
+                       %d127              ;  white space characters
+
+   quoted-pair     =   ("\" (VCHAR / WSP)) / obs-qp
+
+   VCHAR           =   %x21-7E            ; visible (printing) characters
+
+   obs-qp          =   "\" (%d0 / obs-NO-WS-CTL / LF / CR)
+
+   obs-local-part  =   word *("." word)
+
+   word            =   atom / quoted-string
+
+   atom            =   [CFWS] 1*atext [CFWS]
+
+   domain          =   dot-atom / domain-literal / obs-domain
+
+   domain-literal  =   [CFWS] "[" *([FWS] dtext) [FWS] "]" [CFWS]
+
+   dtext           =   %d33-90 /          ; Printable US-ASCII
+                       %d94-126 /         ;  characters not including
+                       obs-dtext          ;  "[", "]", or "\"
+
+   obs-dtext       =   obs-NO-WS-CTL / quoted-pair
+
+   obs-domain      =   atom *("." atom)
+</pre>
+</body>
+
+</html>

@@ -4,7 +4,7 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Version 1.2
+Version 1.3
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
@@ -57,13 +57,14 @@ function is_email ($email, $checkDNS = false) {
 	foreach ($dotArray as $localElement) {
 		//	Each dot-delimited component can be an atom or a quoted string
 		//	(because of the obs-local-part provision)
-		if (preg_match('/^"(?:.)*"$/', $localElement) > 0) {
+		if (preg_match('/^"(?:.)*"$/s', $localElement) > 0) {
 			//	Quoted-string tests:
 			//
 			//	My regex skillz aren't up to distunguishing between \" \\" \\\" \\\\" etc.
 			//	So remove all \\ from the string first...
-			$localElement = str_replace('\\\\', '', $localElement);
-			if (preg_match('/(?<!\\\\|^)"(?!$)|\\\\"$|""/', $localElement) > 0)	return false;	//	" must be escaped, \ must have a partner, "" is too short
+			//	Also remove valid folding white space
+			$localElement = preg_replace('/\\\\\\\\|\\x0D\\x0A[ \\x09]/', ' ', $localElement);
+			if (preg_match('/(?<!\\\\|^)["\\x0D\\x0A\\x00](?!$)|\\\\"$|""/', $localElement) > 0)	return false;	//	", CR, LF and NUL must be escaped, "" is too short
 		} else {
 			//	Unquoted string tests:
 			//
@@ -81,8 +82,8 @@ function is_email ($email, $checkDNS = false) {
 			//	are to appear, they must be quoted
 			//		(http://tools.ietf.org/html/rfc3696#section-3)
 			//
-			//	Any excluded characters? i.e. 0x00-0x20, @, [, ], \, ", <comma>
-			if (preg_match('/[\\x00-\\x20@\\[\\]\\\\",]/', $localElement) > 0)	return false;	//	These characters must be in a quoted string
+			//	Any excluded characters? i.e. 0x00-0x20, @, [, ], \, ", <comma>, (, ), <, >, :, ;
+			if (preg_match('/[\\x00-\\x20@\\[\\]\\\\",\\(\\)<>:;]/', $localElement) > 0)	return false;	//	These characters must be in a quoted string
 		}
 	}
 
@@ -132,8 +133,7 @@ function is_email ($email, $checkDNS = false) {
 		}
 
 		//	Check for unmatched characters
-		array_multisort($matchesIP
-[1], SORT_DESC);
+		array_multisort($matchesIP[1], SORT_DESC);
 		if ($matchesIP[1][0] !== '')							return false;	//	Illegal characters in address
 
 		//	It's a valid IPv6 address, so...
