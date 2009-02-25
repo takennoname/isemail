@@ -4,29 +4,35 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Version 1.3
+Contains some code from RFC3696 Email Parser by Cal Henderson <cal@iamcal.com>
+
+Version 1.4
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
 */
-function is_email ($email, $checkDNS = false) {
+
+//	PHPLint modules
+/*.
+	require_module 'standard';
+	require_module 'pcre';
+.*/
+/*.boolean.*/ function is_email (/*.string.*/ $email, $checkDNS = false) {
 	//	Check that $email is a valid address. Read the following RFCs to understand the constraints:
+	//		(http://tools.ietf.org/html/rfc5322)
 	//		(http://tools.ietf.org/html/rfc3696)
-	//		(http://tools.ietf.org/html/rfc2822)
-	//		(http://tools.ietf.org/html/rfc2821#section-4.5.3)
-	//		(http://tools.ietf.org/html/rfc5322#section-3.4.1)
-	//		(http://tools.ietf.org/html/rfc5321#section-4.1.3)
+	//		(http://tools.ietf.org/html/rfc5321)
 	//		(http://tools.ietf.org/html/rfc4291#section-2.2)
 	//		(http://tools.ietf.org/html/rfc1123#section-2.1)
 	
 	//	the upper limit on address lengths should normally be considered to be 256
 	//		(http://www.rfc-editor.org/errata_search.php?rfc=3696)
-	//		NB I think John Klensin is misreading RFC 2821 and the the limit should actually be 254
+	//		NB I think John Klensin is misreading RFC 5321 and the the limit should actually be 254
 	//		However, I will stick to the published number until it is changed.
 	//
 	//	The maximum total length of a reverse-path or forward-path is 256
 	//	characters (including the punctuation and element separators)
-	//		(http://tools.ietf.org/html/rfc2821#section-4.5.3)
+	//		(http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3)
 	if (strlen($email) > 256)	return false;	//	Too long
 
 	//	Contemporary email addresses consist of a "local part" separated from
@@ -44,16 +50,40 @@ function is_email ($email, $checkDNS = false) {
 	
 	if ($domainLength === 0)	return false;	//	No domain part
 	if ($domainLength > 255)	return false;	//	Domain part too long
-
+	
 	//	Let's check the local part for RFC compliance...
+
+	//	First we need to remove all valid comments
+	//	Comment patterns lifted from Cal Henderson (http://iamcal.com) who doesn't suck at regexes
+	$cr				= "\\x0d";
+	$lf				= "\\x0a";
+	$obs_char		= "[\\x00-\\x09\\x0b\\x0c\\x0e-\\x7f]";
+	$text			= "(?:$lf*$cr*$obs_char$lf*$cr*)";
+	$obs_qp			= "(?:\\x5c[\\x00-\\x7f])";
+	$quoted_pair	= "(?:\\x5c$text|$obs_qp)";
+	$crlf			= "(?:$cr$lf)";
+	$no_ws_ctl		= "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]";
+	$wsp			= "[\\x20\\x09]";
+	$obs_fws		= "(?:$wsp+(?:$crlf$wsp+)*)";
+	$fws			= "(?:(?:(?:$wsp*$crlf)?$wsp+)|$obs_fws)";
+	$ctext			= "(?:$no_ws_ctl|[\\x21-\\x27\\x2A-\\x5b\\x5d-\\x7e])";
+	$ccontent		= "(?:$ctext|$quoted_pair)";
+	$comment		= "(?:\\x28(?:$fws?$ccontent)*$fws?\\x29)";
+
+	//	Comments can be nested
+	do {
+		$interim = preg_replace("/$comment/", '', $localPart);
+		if ($interim === $localPart) break;
+	} while ($localPart = $interim);
+
 	//
 	//	local-part      =       dot-atom / quoted-string / obs-local-part
 	//	obs-local-part  =       word *("." word)
-	//		(http://tools.ietf.org/html/rfc2822#section-3.4.1)
+	//		(http://tools.ietf.org/html/rfc5322#section-3.4.1)
 	//
 	//	Problem: need to distinguish between "first.last" and "first"."last"
 	//	(i.e. one element or two). And I suck at regexes.
-	$dotArray	= preg_split('/(\\.|\\r\\n|\\n|\\r)(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
+	$dotArray	= /*. (array[int]string) .*/ preg_split('/(\\.|\\r\\n|\\n|\\r)(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
 	foreach ($dotArray as $localElement) {
 		//	Each dot-delimited component can be an atom or a quoted string
 		//	(because of the obs-local-part provision)
@@ -62,8 +92,8 @@ function is_email ($email, $checkDNS = false) {
 			//
 			//	My regex skillz aren't up to distunguishing between \" \\" \\\" \\\\" etc.
 			//	So remove all \\ from the string first...
-			//	Also remove valid folding white space
-			$localElement = preg_replace('/\\\\\\\\|\\x0D\\x0A[ \\x09]/', ' ', $localElement);
+			//	Also remove valid folding white space unless it's escaped
+			$localElement = preg_replace('/\\\\\\\\|(?<!\\\\|^)\\x0D\\x0A[ \\x09]/', ' ', $localElement);
 			if (preg_match('/(?<!\\\\|^)["\\x0D\\x0A\\x00](?!$)|\\\\"$|""/', $localElement) > 0)	return false;	//	", CR, LF and NUL must be escaped, "" is too short
 		} else {
 			//	Unquoted string tests:
@@ -74,7 +104,7 @@ function is_email ($email, $checkDNS = false) {
 			//
 			//	A zero-length element implies a period at the beginning or end of the
 			//	local part, or two periods together. Either way it's not allowed.
-			if ($localElement === '')											return false;	//	Dots in wrong place
+			if ($localElement === '')																return false;	//	Dots in wrong place
 
 			//	Any ASCII graphic (printing) character other than the
 			//	at-sign ("@"), backslash, double quote, comma, or square brackets may
@@ -83,11 +113,20 @@ function is_email ($email, $checkDNS = false) {
 			//		(http://tools.ietf.org/html/rfc3696#section-3)
 			//
 			//	Any excluded characters? i.e. 0x00-0x20, @, [, ], \, ", <comma>, (, ), <, >, :, ;
-			if (preg_match('/[\\x00-\\x20@\\[\\]\\\\",\\(\\)<>:;]/', $localElement) > 0)	return false;	//	These characters must be in a quoted string
+			if (preg_match('/[\\x00-\\x20@\\[\\]\\\\",\\(\\)<>:;]/', $localElement) > 0)			return false;	//	These characters must be in a quoted string
 		}
 	}
 
 	//	Now let's check the domain part...
+
+	//	First we need to remove all valid comments
+	//	Comments can be nested
+	do {
+		$interim = preg_replace("/$comment/", '', $domain);
+		if ($interim === $domain) break;
+	} while ($domain = $interim);
+
+	$domainLength	= strlen($domain);
 
 	//	The domain name can also be replaced by an IP address in square brackets
 	//		(http://tools.ietf.org/html/rfc3696#section-3)
