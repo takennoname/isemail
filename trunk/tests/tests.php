@@ -183,10 +183,24 @@ echo '<p>' . unitTest("Fred\\ Bloggs@example.com", false, "Was incorrectly given
 echo '<p>' . unitTest("Joe.\\\\Blow@example.com", false, "Was incorrectly given as a valid address in the original RFC3696") . "</p>\n";
 echo '<p>' . unitTest("first.last@[IPv6:1111:2222:3333:4444:5555:6666:12.34.567.89]", false, "IPv4 part contains an invalid octet") . "</p>\n";
 echo '<p>' . unitTest("\"test\\
- blah\"@example.com", true, "Folding white space can appear in a quoted string") . "</p>\n";
+ blah\"@example.com", false, "Folding white space can\'t appear within a quoted pair") . "</p>\n";
 echo '<p>' . unitTest("\"test
- blah\"@example.com", true, "Disagree with Phil Haack here - I think this is a valid quoted string with folding white space") . "</p>\n";
-echo '<p>' . unitTest("{^c\\@**Dog^}@cartoon.com", False, "This is a throwaway example from Doug Lovell\'s article. Actually it\'s not a valid address.") . "</p>\n";
+ blah\"@example.com", true, "This is a valid quoted string with folding white space") . "</p>\n";
+echo '<p>' . unitTest("{^c\\@**Dog^}@cartoon.com", false, "This is a throwaway example from Doug Lovell\'s article. Actually it\'s not a valid address.") . "</p>\n";
+echo '<p>' . unitTest("(foo)cal(bar)@(baz)iamcal.com(quux)", true, "A valid address containing comments") . "</p>\n";
+echo '<p>' . unitTest("cal@iamcal(woo).(yay)com", true, "A valid address containing comments") . "</p>\n";
+echo '<p>' . unitTest("\"foo\"(yay)@(hoopla)[1.2.3.4]", true, "A valid address containing comments") . "</p>\n";
+echo '<p>' . unitTest("cal(woo(yay)hoopla)@iamcal.com", true, "A valid address containing comments") . "</p>\n";
+echo '<p>' . unitTest("cal(foo\\@bar)@iamcal.com", true, "A valid address containing comments") . "</p>\n";
+echo '<p>' . unitTest("cal(foo\\)bar)@iamcal.com", true, "A valid address containing comments and an escaped parenthesis") . "</p>\n";
+echo '<p>' . unitTest("cal(foo(bar)@iamcal.com", false, "Unclosed parenthesis in comment") . "</p>\n";
+echo '<p>' . unitTest("cal(foo)bar)@iamcal.com", false, "Too many closing parentheses") . "</p>\n";
+echo '<p>' . unitTest("cal(foo\\)@iamcal.com", false, "Backslash at end of comment has nothing to escape") . "</p>\n";
+echo '<p>' . unitTest("first()last@example.com", true, "A valid address containing an empty comment") . "</p>\n";
+echo '<p>' . unitTest("first(
+ middle
+ )last@example.com", true, "A valid address containing a comment incorporating Folding White Space") . "</p>\n";
+echo '<p>' . unitTest("first(12345678901234567890123456789012345678901234567890)last@(1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890)example.com", false, "Too long with comments, not too long without") . "</p>\n";
 ?>
 </body>
 
