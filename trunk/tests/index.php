@@ -18,7 +18,10 @@ $php = <<<PHP
 <title>is_email() - Run unit tests</title>
 
 <style type="text/css">
-p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;}
+div {clear:left;}
+p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;float:left;}
+p.valid {width:60px;}
+p.address {text-align:right;width:400px;overflow:hidden;margin-right:8px;}
 </style>
 </head>
 
@@ -28,11 +31,11 @@ require_once '..\is_email.php';
 
 function unitTest (\$email, \$expected, \$comment = '') {
 	\$valid		= is_email(\$email);
-	\$not		= (\$valid) ? '' : ' not';
-	\$unexpected	= (\$valid !== \$expected) ? ' <b>This was unexpected!</b>' : '';
-	\$comment		= (\$comment === '') ? "" : " Comment: \$comment";
+	\$not		= (\$valid) ? 'Valid' : 'Not valid';
+	\$unexpected	= (\$valid !== \$expected) ? " <b>\$not</b>" : "\$not";
+	\$comment		= (\$comment === '') ? "&nbsp;" : stripslashes("\$comment");
 	
-	return "The address <i>\$email</i> is\$not valid.\$unexpected\$comment<br />\n";
+	return "<div><p class=\\"address\\"<em>\$email</em></p><p class=\\"valid\\">\$unexpected</p><p class=\\"comment\\">\$comment</p></div>\n";
 }
 
 
@@ -60,11 +63,12 @@ for ($i = 0; $i < $testList->length; $i++) {
 
 	$expected	= ($valid === 'true') ? true : false; // debug
 	$address	= addslashes($address);
+	$address	= str_replace(array(chr(9),chr(10),chr(13)), array('\t','\n','\r'), $address);
 	$address	= str_replace('$', '\\$', $address);
 	$comment		= addslashes($comment);
 	$comment		= str_replace('$', '\\$', $comment);
 
-	$php .= "echo '<p>' . unitTest(\"$address\", $valid, \"$comment\") . \"</p>\\n\";\n";
+	$php .= "echo unitTest(\"$address\", $valid, \"$comment\");\n";
 }
 
 //	Bottom of PHP script

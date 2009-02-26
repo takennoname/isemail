@@ -4,9 +4,7 @@ Copyright 2009 Dominic Sayers
 	dominic_sayers@hotmail.com
 	http://www.dominicsayers.com
 
-Contains some code from RFC3696 Email Parser by Cal Henderson <cal@iamcal.com>
-
-Version 1.4
+Version 1.6
 
 This source file is subject to the Common Public Attribution License Version 1.0 (CPAL) license.
 The license terms are available through the world-wide-web at http://www.opensource.org/licenses/cpal_1.0
@@ -33,49 +31,89 @@ The license terms are available through the world-wide-web at http://www.opensou
 	//	The maximum total length of a reverse-path or forward-path is 256
 	//	characters (including the punctuation and element separators)
 	//		(http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3)
-	if (strlen($email) > 256)	return false;	//	Too long
+	$emailLength = strlen($email);
+	if ($emailLength > 256)	return false;	//	Too long
 
 	//	Contemporary email addresses consist of a "local part" separated from
 	//	a "domain part" (a fully-qualified domain name) by an at-sign ("@").
 	//		(http://tools.ietf.org/html/rfc3696#section-3)
-	$index = strrpos($email,'@');
+	$atIndex		= strrpos($email,'@');
 
-	if ($index === false)		return false;	//	No at-sign
-	if ($index === 0)			return false;	//	No local part
-	if ($index > 64)			return false;	//	Local part too long
+	if ($atIndex === false)			return false;	//	No at-sign
+	if ($atIndex === 0)				return false;	//	No local part
+	if ($atIndex === $emailLength)	return false;	//	No domain part
+	
+	//	Sanitize comments
+	//	- remove nested comments, quotes and dots in comments
+	//	- remove parentheses and dots from quoted strings
+	$braceDepth		= 0;
+	$inQuote		= false;
+	$escapeThisChar	= false;
 
-	$localPart		= substr($email, 0, $index);
-	$domain			= substr($email, $index + 1);
-	$domainLength	= strlen($domain);
-	
-	if ($domainLength === 0)	return false;	//	No domain part
-	if ($domainLength > 255)	return false;	//	Domain part too long
-	
+	for ($i = 0; $i < $emailLength; ++$i) {
+		$char = $email[$i];
+		$replaceChar = false;
+
+		if ($char === '\\') {
+			$escapeThisChar = !$escapeThisChar;	//	Escape the next character?
+		} else {
+			switch ($char) {
+			case '(':
+				if ($escapeThisChar) {
+					$replaceChar = true;
+				} else {
+					if ($inQuote) {
+						$replaceChar = true;
+					} else {
+						if ($braceDepth++ > 0) $replaceChar = true;	//	Increment brace depth
+					}
+				}
+
+				break;
+			case ')':
+				if ($escapeThisChar) {
+					$replaceChar = true;
+				} else {
+					if ($inQuote) {
+						$replaceChar = true;
+					} else {
+						if (--$braceDepth > 0) $replaceChar = true;	//	Decrement brace depth
+						if ($braceDepth < 0) $braceDepth = 0;
+					}
+				}
+
+				break;
+			case '"':
+				if ($escapeThisChar) {
+					$replaceChar = true;
+				} else {
+					if ($braceDepth === 0) {
+						$inQuote = !$inQuote;	//	Are we inside a quoted string?
+					} else {
+						$replaceChar = true;
+					}
+				}
+
+				break;
+			case '.':	//	Dots don't help us either
+				if ($escapeThisChar) {
+					$replaceChar = true;
+				} else {
+					if ($braceDepth > 0) $replaceChar = true;
+				}
+
+				break;
+			}
+
+			$escapeThisChar = false;
+			if ($replaceChar) $email[$i] = 'x';	//	Replace the offending character with something harmless
+		}
+	}
+
+	$localPart		= substr($email, 0, $atIndex);
+	$domain			= substr($email, $atIndex + 1);
+	$FWS			= "(?:(?:(?:[ \\t]*(?:\\r\\n))?[ \\t]+)|(?:[ \\t]+(?:(?:\\r\\n)[ \\t]+)*))";	//	Folding white space
 	//	Let's check the local part for RFC compliance...
-
-	//	First we need to remove all valid comments
-	//	Comment patterns lifted from Cal Henderson (http://iamcal.com) who doesn't suck at regexes
-	$cr				= "\\x0d";
-	$lf				= "\\x0a";
-	$obs_char		= "[\\x00-\\x09\\x0b\\x0c\\x0e-\\x7f]";
-	$text			= "(?:$lf*$cr*$obs_char$lf*$cr*)";
-	$obs_qp			= "(?:\\x5c[\\x00-\\x7f])";
-	$quoted_pair	= "(?:\\x5c$text|$obs_qp)";
-	$crlf			= "(?:$cr$lf)";
-	$no_ws_ctl		= "[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]";
-	$wsp			= "[\\x20\\x09]";
-	$obs_fws		= "(?:$wsp+(?:$crlf$wsp+)*)";
-	$fws			= "(?:(?:(?:$wsp*$crlf)?$wsp+)|$obs_fws)";
-	$ctext			= "(?:$no_ws_ctl|[\\x21-\\x27\\x2A-\\x5b\\x5d-\\x7e])";
-	$ccontent		= "(?:$ctext|$quoted_pair)";
-	$comment		= "(?:\\x28(?:$fws?$ccontent)*$fws?\\x29)";
-
-	//	Comments can be nested
-	do {
-		$interim = preg_replace("/$comment/", '', $localPart);
-		if ($interim === $localPart) break;
-	} while ($localPart = $interim);
-
 	//
 	//	local-part      =       dot-atom / quoted-string / obs-local-part
 	//	obs-local-part  =       word *("." word)
@@ -83,18 +121,56 @@ The license terms are available through the world-wide-web at http://www.opensou
 	//
 	//	Problem: need to distinguish between "first.last" and "first"."last"
 	//	(i.e. one element or two). And I suck at regexes.
-	$dotArray	= /*. (array[int]string) .*/ preg_split('/(\\.|\\r\\n|\\n|\\r)(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
-	foreach ($dotArray as $localElement) {
+	$dotArray	= /*. (array[int]string) .*/ preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
+	$partLength = 0;
+
+	foreach ($dotArray as $element) {
+		//	Remove any leading or trailing FWS
+		$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+
+		//	Then we need to remove all valid comments (i.e. those at the start or end of the element
+		$elementLength = strlen($element);
+
+		if ($element[0] === '(') {
+			$indexBrace = strpos($element, ')');
+			if ($indexBrace !== false) {
+				if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0) {
+																						return false;	//	Illegal characters in comment
+				}
+				$element = substr($element, $indexBrace + 1, $elementLength - $indexBrace - 1);
+				$elementLength = strlen($element);
+			}
+		}
+		
+		if ($element[$elementLength - 1] === ')') {
+			$indexBrace = strrpos($element, '(');
+			if ($indexBrace !== false) {
+				if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0) {
+																						return false;	//	Illegal characters in comment
+				}
+				$element = substr($element, 0, $indexBrace);
+				$elementLength = strlen($element);
+			}
+		}			
+
+		//	Remove any leading or trailing FWS around the element (inside any comments)
+		$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+
+		//	What's left counts towards the maximum length for this part
+		if ($partLength > 0) $partLength++;	//	for the dot
+		$partLength += strlen($element);
+
 		//	Each dot-delimited component can be an atom or a quoted string
 		//	(because of the obs-local-part provision)
-		if (preg_match('/^"(?:.)*"$/s', $localElement) > 0) {
+		if (preg_match('/^"(?:.)*"$/s', $element) > 0) {
 			//	Quoted-string tests:
 			//
-			//	My regex skillz aren't up to distunguishing between \" \\" \\\" \\\\" etc.
+			//	Remove any FWS
+			$element = preg_replace("/(?<!\\\\)$FWS/", '', $element);
+			//	My regex skillz aren't up to distinguishing between \" \\" \\\" \\\\" etc.
 			//	So remove all \\ from the string first...
-			//	Also remove valid folding white space unless it's escaped
-			$localElement = preg_replace('/\\\\\\\\|(?<!\\\\|^)\\x0D\\x0A[ \\x09]/', ' ', $localElement);
-			if (preg_match('/(?<!\\\\|^)["\\x0D\\x0A\\x00](?!$)|\\\\"$|""/', $localElement) > 0)	return false;	//	", CR, LF and NUL must be escaped, "" is too short
+			$element = preg_replace('/\\\\\\\\/', ' ', $element);
+			if (preg_match('/(?<!\\\\|^)["\\r\\n\\x00](?!$)|\\\\"$|""/', $element) > 0)	return false;	//	", CR, LF and NUL must be escaped, "" is too short
 		} else {
 			//	Unquoted string tests:
 			//
@@ -104,7 +180,7 @@ The license terms are available through the world-wide-web at http://www.opensou
 			//
 			//	A zero-length element implies a period at the beginning or end of the
 			//	local part, or two periods together. Either way it's not allowed.
-			if ($localElement === '')																return false;	//	Dots in wrong place
+			if ($element === '')														return false;	//	Dots in wrong place
 
 			//	Any ASCII graphic (printing) character other than the
 			//	at-sign ("@"), backslash, double quote, comma, or square brackets may
@@ -112,21 +188,14 @@ The license terms are available through the world-wide-web at http://www.opensou
 			//	are to appear, they must be quoted
 			//		(http://tools.ietf.org/html/rfc3696#section-3)
 			//
-			//	Any excluded characters? i.e. 0x00-0x20, @, [, ], \, ", <comma>, (, ), <, >, :, ;
-			if (preg_match('/[\\x00-\\x20@\\[\\]\\\\",\\(\\)<>:;]/', $localElement) > 0)			return false;	//	These characters must be in a quoted string
+			//	Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :, ;, @, \, comma, period, "
+			if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]/', $element) > 0)	return false;	//	These characters must be in a quoted string
 		}
 	}
 
+	if ($partLength > 64) return false;	// Local part must be 64 characters or less
+
 	//	Now let's check the domain part...
-
-	//	First we need to remove all valid comments
-	//	Comments can be nested
-	do {
-		$interim = preg_replace("/$comment/", '', $domain);
-		if ($interim === $domain) break;
-	} while ($domain = $interim);
-
-	$domainLength	= strlen($domain);
 
 	//	The domain name can also be replaced by an IP address in square brackets
 	//		(http://tools.ietf.org/html/rfc3696#section-3)
@@ -134,7 +203,7 @@ The license terms are available through the world-wide-web at http://www.opensou
 	//		(http://tools.ietf.org/html/rfc4291#section-2.2)
 	if (preg_match('/^\\[(.)+]$/', $domain) === 1) {
 		//	It's an address-literal
-		$addressLiteral = substr($domain, 1, $domainLength - 2);
+		$addressLiteral = substr($domain, 1, strlen($domain) - 2);
 		$matchesIP		= array();
 		
 		//	Extract IPv4 part from the end of the address-literal (if there is one)
@@ -188,7 +257,13 @@ The license terms are available through the world-wide-web at http://www.opensou
 		//
 		//	NB RFC 1123 updates RFC 1035, but this is not currently apparent from reading RFC 1035.
 		//
-		//	Most common applications, including email and the Web, will generally not permit...escaped strings
+		//	Most common applications, including email and the Web, will generally not
+		//	permit...escaped strings
+		//		(http://tools.ietf.org/html/rfc3696#section-2)
+		//
+		//	the better strategy has now become to make the "at least one period" test,
+		//	to verify LDH conformance (including verification that the apparent TLD name
+		//	is not all-numeric)
 		//		(http://tools.ietf.org/html/rfc3696#section-2)
 		//
 		//	Characters outside the set of alphabetic characters, digits, and hyphen MUST NOT appear in domain name
@@ -197,30 +272,89 @@ The license terms are available through the world-wide-web at http://www.opensou
 		//
 		//	RFC5321 precludes the use of a trailing dot in a domain name for SMTP purposes
 		//		(http://tools.ietf.org/html/rfc5321#section-4.1.2)
-		$matches	= array();
-		$groupCount	= preg_match_all('/(?:[0-9a-zA-Z][0-9a-zA-Z-]{0,61}[0-9a-zA-Z]|[a-zA-Z])(?:\\.|$)|(.)/', $domain, $matches);
-		$level		= count($matches[0]);
+		$dotArray	= /*. (array[int]string) .*/ preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $domain);
+		$partLength = 0;
 
-		if ($level == 1)										return false;	//	Mail host can't be a TLD
+		if (count($dotArray) === 1)					return false;	//	Mail host can't be a TLD
 
-		$TLD = $matches[0][$level - 1];
-		if (substr($TLD, strlen($TLD) - 1, 1) === '.')			return false;	//	TLD can't end in a dot
-		if (preg_match('/^[0-9]+$/', $TLD) > 0)					return false;	//	TLD can't be all-numeric
-
-		//	Check for unmatched characters
-		array_multisort($matches[1], SORT_DESC);
-		if ($matches[1][0] !== '')								return false;	//	Illegal characters in domain, or label longer than 63 characters
-
-		//	Check DNS?
-		if ($checkDNS && function_exists('checkdnsrr')) {
-			if (!(checkdnsrr($domain, 'A') || checkdnsrr($domain, 'MX'))) {
-																return false;	//	Domain doesn't actually exist
+		foreach ($dotArray as $element) {
+			//	Remove any leading or trailing FWS
+			$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+	
+			//	Then we need to remove all valid comments (i.e. those at the start or end of the element
+			$elementLength = strlen($element);
+	
+			if ($element[0] === '(') {
+				$indexBrace = strpos($element, ')');
+				if ($indexBrace !== false) {
+					if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0) {
+													return false;	//	Illegal characters in comment
+					}
+					$element = substr($element, $indexBrace + 1, $elementLength - $indexBrace - 1);
+					$elementLength = strlen($element);
+				}
+			}
+			
+			if ($element[$elementLength - 1] === ')') {
+				$indexBrace = strrpos($element, '(');
+				if ($indexBrace !== false) {
+					if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0) {
+													return false;	//	Illegal characters in comment
+					}
+					$element = substr($element, 0, $indexBrace);
+					$elementLength = strlen($element);
+				}
+			}			
+	
+			//	Remove any leading or trailing FWS around the element (inside any comments)
+			$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+	
+			//	What's left counts towards the maximum length for this part
+			if ($partLength > 0) $partLength++;	//	for the dot
+			$partLength += strlen($element);
+	
+			//	The DNS defines domain name syntax very generally -- a
+			//	string of labels each containing up to 63 8-bit octets,
+			//	separated by dots, and with a maximum total of 255
+			//	octets.
+			//		(http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
+			if ($elementLength > 63)				return false;	//	Label must be 63 characters or less
+	
+			//	Each dot-delimited component must be atext
+			//	A zero-length element implies a period at the beginning or end of the
+			//	local part, or two periods together. Either way it's not allowed.
+			if ($elementLength === 0)				return false;	//	Dots in wrong place
+	
+			//	Any ASCII graphic (printing) character other than the
+			//	at-sign ("@"), backslash, double quote, comma, or square brackets may
+			//	appear without quoting.  If any of that list of excluded characters
+			//	are to appear, they must be quoted
+			//		(http://tools.ietf.org/html/rfc3696#section-3)
+			//
+			//	If the hyphen is used, it is not permitted to appear at
+			//	either the beginning or end of a label.
+			//		(http://tools.ietf.org/html/rfc3696#section-2)
+			//
+			//	Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :, ;, @, \, comma, period, "
+			if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]|^-|-$/', $element) > 0) {
+													return false;
 			}
 		}
 
-		//	Eliminate all other factors, and the one which remains must be the truth.
-		//		(Sherlock Holmes, The Sign of Four)
-		return true;
+		if ($partLength > 255) 						return false;	// Local part must be 64 characters or less
+
+		if (preg_match('/^[0-9]+$/', $element) > 0)	return false;	//	TLD can't be all-numeric
 	}
+
+	//	Check DNS?
+	if ($checkDNS && function_exists('checkdnsrr')) {
+		if (!(checkdnsrr($domain, 'A') || checkdnsrr($domain, 'MX'))) {
+													return false;	//	Domain doesn't actually exist
+		}
+	}
+
+	//	Eliminate all other factors, and the one which remains must be the truth.
+	//		(Sherlock Holmes, The Sign of Four)
+	return true;
 }
 ?>
