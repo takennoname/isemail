@@ -8,7 +8,7 @@
 
 <body>
 <?php
-//	Top of PHP script
+// Top of PHP script
 $php = <<<PHP
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -72,7 +72,7 @@ for ($i = 0; $i < $testList->length; $i++) {
 	$php .= "echo unitTest(\"$address\", $valid, \"$comment\");\n";
 }
 
-//	Bottom of PHP script
+// Bottom of PHP script
 $php .= '?';
 $php .= <<<PHP
 >
