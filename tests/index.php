@@ -22,6 +22,8 @@ div {clear:left;}
 p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;float:left;}
 p.valid {width:60px;}
 p.address {text-align:right;width:400px;overflow:hidden;margin-right:8px;}
+p.author {font-style:italic;}
+hr {clear:left;}
 </style>
 </head>
 
@@ -44,14 +46,24 @@ PHP;
 $document = new DOMDocument();
 $document->load('tests.xml');
 
+// Get version
+$suite = $document->getElementsByTagName('tests')->item(0);
+
+if ($suite->hasAttribute('version')) {
+	$version = $suite->getAttribute('version');
+	$php .= "echo \"<h3>Email address validation test suite version $version</h3>\\n\";\n";
+}
+
+$php .= "echo \"<p class=\\\"author\\\">Dominic Sayers | <a href=\\\"mailto:dominic_sayers@hotmail.com\\\">dominic_sayers@hotmail.com</a> | <a href=\\\"http://www.dominicsayers.com/isemail\\\">RFC-compliant email address validation</a></p>\\n<br>\\n<hr>\\n\";\n";
+
 $testList = $document->getElementsByTagName('test');
 
 for ($i = 0; $i < $testList->length; $i++) {
 	$tagList = $testList->item($i)->childNodes;
 
-	unset($address);
-	unset($valid);
-	unset($comment);
+	$address	= '';
+	$valid		= '';
+	$comment	= '';
 
 	for ($j = 0; $j < $tagList->length; $j++) {
 		$node = $tagList->item($j);
@@ -66,8 +78,8 @@ for ($i = 0; $i < $testList->length; $i++) {
 	$address	= addslashes($address);
 	$address	= str_replace(array(chr(9),chr(10),chr(13)), array('\t','\n','\r'), $address);
 	$address	= str_replace('$', '\\$', $address);
-	$comment		= addslashes($comment);
-	$comment		= str_replace('$', '\\$', $comment);
+	$comment	= addslashes($comment);
+	$comment	= str_replace('$', '\\$', $comment);
 
 	$php .= "echo unitTest(\"$address\", $valid, \"$comment\");\n";
 }
