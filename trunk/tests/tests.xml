@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tests version="1.8">
+<tests version="1.9">
 	<test>
 		<address>first.last@example.com</address>
 		<valid>true</valid>
@@ -1727,5 +1727,13 @@
 		<source>George Pollard</source>
 		<sourcelink>http://porg.es/blog/properly-validating-e-mail-addresses</sourcelink>
 		<id>228</id>
+	</test>
+	<test>
+		<address>cdburgess+!#$%&amp;'*-/=?+_{}|~test@gmail.com</address>
+		<valid>true</valid>
+		<comment>Example given in comments</comment>
+		<source>http://www.dominicsayers.com/isemail/#comment-30024957</source>
+		<sourcelink>cdburgess</sourcelink>
+		<id>229</id>
 	</test>
 </tests>
