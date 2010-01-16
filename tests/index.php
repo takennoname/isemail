@@ -20,7 +20,7 @@ $php = <<<PHP
 <style type="text/css">
 div {clear:left;}
 p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;float:left;}
-p.valid {width:60px;}
+p.valid {width:90px;}
 p.address {text-align:right;width:400px;overflow:hidden;margin-right:8px;}
 p.author {font-style:italic;}
 hr {clear:left;}
@@ -32,10 +32,11 @@ hr {clear:left;}
 require_once '../is_email.php';
 
 function unitTest (\$email, \$expected, \$comment = '') {
-	\$valid		= is_email(\$email);
-	\$not		= (\$valid) ? 'Valid' : 'Not valid';
+	\$diagnosis	= is_email(\$email, false, true);
+	\$valid		= (\$diagnosis === ISEMAIL_VALID);
+	\$not		= (\$valid) ? 'Valid' : "Not valid (\$diagnosis)";
 	\$unexpected	= (\$valid !== \$expected) ? " <b>\$not</b>" : "\$not";
-	\$comment		= (\$comment === '') ? "&nbsp;" : stripslashes("\$comment");
+	\$comment	= (\$comment === '') ? "&nbsp;" : stripslashes("\$comment");
 	
 	return "<div><p class=\\"address\\"<em>\$email</em></p><p class=\\"valid\\">\$unexpected</p><p class=\\"comment\\">\$comment</p></div>\n";
 }
@@ -74,12 +75,10 @@ for ($i = 0; $i < $testList->length; $i++) {
 	}
 
 	$expected	= ($valid === 'true') ? true : false;
-	$address	= str_replace('\\0', chr(0), $address);	// Can't use &#00; in XML file
-	$address	= addslashes($address);
-	$address	= str_replace(array(chr(9),chr(10),chr(13)), array('\t','\n','\r'), $address);
-	$address	= str_replace('$', '\\$', $address);
-	$comment	= addslashes($comment);
-	$comment	= str_replace('$', '\\$', $comment);
+	$needles	= array('\\0'	, '\\'		, '"'	, '$'	, chr(9)	,chr(10)	,chr(13));
+	$substitutes	= array(chr(0)	, '\\\\'	, '\\"'	, '\\$'	, '\t'		,'\n'		,'\r');
+	$address	= str_replace($needles, $substitutes, $address);
+	$comment	= str_replace($needles, $substitutes, $comment);
 
 	$php .= "echo unitTest(\"$address\", $valid, \"$comment\");\n";
 }
