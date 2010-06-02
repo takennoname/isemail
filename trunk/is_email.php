@@ -2,10 +2,10 @@
 /**
  * @package	isemail
  * @author	Dominic Sayers <dominic_sayers@hotmail.com>
- * @copyright	2009 Dominic Sayers
+ * @copyright	2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://www.dominicsayers.com/isemail
- * @version	1.16 - Added optional diagnosis codes (amended all lines with a return statement)
+ * @version	1.17 - Upper length limit corrected to 254 characters
  */
 
 /*
@@ -78,16 +78,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		define('ISEMAIL_NOTDEFINED'		, 99);
 	}
 
-	// the upper limit on address lengths should normally be considered to be 256
+	// the upper limit on address lengths should normally be considered to be 254
 	// 	(http://www.rfc-editor.org/errata_search.php?rfc=3696)
-	// 	NB I think John Klensin is misreading RFC 5321 and the the limit should actually be 254
-	// 	However, I will stick to the published number until it is changed.
+	// 	NB My erratum has now been verified by the IETF so the correct answer is 254
 	//
 	// The maximum total length of a reverse-path or forward-path is 256
 	// characters (including the punctuation and element separators)
 	// 	(http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3)
+	//	NB There is a mandatory 2-character wrapper round the actual address
 	$emailLength = strlen($email);
-	if ($emailLength > 256)			return $diagnose ? ISEMAIL_TOOLONG	: false;	// Too long
+	// revision 1.17: Max length reduced to 254 (see above)
+	if ($emailLength > 254)			return $diagnose ? ISEMAIL_TOOLONG	: false;	// Too long
 
 	// Contemporary email addresses consist of a "local part" separated from
 	// a "domain part" (a fully-qualified domain name) by an at-sign ("@").
@@ -356,7 +357,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				$indexBrace = strpos($element, ')');
 				if ($indexBrace !== false) {
 					if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0) {
-										return $diagnose ? ISEMAIL_BADCOMMENTSTART	: false;	// Illegal characters in comment
+// revision 1.17: Fixed name of constant (also spotted by turboflash - thanks!)
+										return $diagnose ? ISEMAIL_BADCOMMENT_START	: false;	// Illegal characters in comment
 					}
 					$element	= substr($element, $indexBrace + 1, $elementLength - $indexBrace - 1);
 					$elementLength	= strlen($element);
@@ -367,7 +369,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 				$indexBrace = strrpos($element, '(');
 				if ($indexBrace !== false) {
 					if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0)
-										return $diagnose ? ISEMAIL_BADCOMMENTEND	: false;	// Illegal characters in comment
+// revision 1.17: Fixed name of constant (also spotted by turboflash - thanks!)
+										return $diagnose ? ISEMAIL_BADCOMMENT_END	: false;	// Illegal characters in comment
 
 					$element	= substr($element, 0, $indexBrace);
 					$elementLength	= strlen($element);
