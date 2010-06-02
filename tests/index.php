@@ -22,6 +22,7 @@ div {clear:left;}
 p {font-family:Segoe UI,Arial,Helvetica,sans-serif;font-size:12px;margin:0;padding:0;float:left;}
 p.valid {width:90px;}
 p.address {text-align:right;width:400px;overflow:hidden;margin-right:8px;}
+p.id {text-align:right;width:40px;overflow:hidden;margin-right:8px;}
 p.author {font-style:italic;}
 hr {clear:left;}
 </style>
@@ -31,14 +32,14 @@ hr {clear:left;}
 <?php
 require_once '../is_email.php';
 
-function unitTest (\$email, \$expected, \$comment = '') {
+function unitTest (\$email, \$expected, \$comment = '', \$id = '') {
 	\$diagnosis	= is_email(\$email, false, true);
 	\$valid		= (\$diagnosis === ISEMAIL_VALID);
 	\$not		= (\$valid) ? 'Valid' : "Not valid (\$diagnosis)";
 	\$unexpected	= (\$valid !== \$expected) ? " <b>\$not</b>" : "\$not";
 	\$comment	= (\$comment === '') ? "&nbsp;" : stripslashes("\$comment");
-	
-	return "<div><p class=\\"address\\"<em>\$email</em></p><p class=\\"valid\\">\$unexpected</p><p class=\\"comment\\">\$comment</p></div>\n";
+
+	return "<div><p class=\\"address\\"<em>\$email</em></p><p class=\\"id\\">\$id</p><p class=\\"valid\\">\$unexpected</p><p class=\\"comment\\">\$comment</p></div>\\n";
 }
 
 
@@ -55,7 +56,10 @@ if ($suite->hasAttribute('version')) {
 	$php .= "echo \"<h3>Email address validation test suite version $version</h3>\\n\";\n";
 }
 
-$php .= "echo \"<p class=\\\"author\\\">Dominic Sayers | <a href=\\\"mailto:dominic_sayers@hotmail.com\\\">dominic_sayers@hotmail.com</a> | <a href=\\\"http://www.dominicsayers.com/isemail\\\">RFC-compliant email address validation</a></p>\\n<br>\\n<hr>\\n\";\n";
+$php .= <<<PHP
+echo "<p class=\\"author\\">Dominic Sayers | <a href=\\"mailto:dominic@sayers.cc\\">dominic@sayers.cc</a> | <a href=\\"http://www.dominicsayers.com/isemail\\">RFC-compliant email address validation</a></p>\\n<br>\\n<hr>\\n";
+echo "<div><p class=\\"address\\"<strong>Address</strong></p><p class=\\"id\\"><strong>Test #</strong></p><p class=\\"valid\\"><strong>Result (reason)</strong></p><p class=\\"comment\\"><strong>Comment</strong></p></div>\\n";
+PHP;
 
 $testList = $document->getElementsByTagName('test');
 
@@ -80,7 +84,7 @@ for ($i = 0; $i < $testList->length; $i++) {
 	$address	= str_replace($needles, $substitutes, $address);
 	$comment	= str_replace($needles, $substitutes, $comment);
 
-	$php .= "echo unitTest(\"$address\", $valid, \"$comment\");\n";
+	$php .= "echo unitTest(\"$address\", $valid, \"$comment\", \"$id\");\n";
 }
 
 // Bottom of PHP script
