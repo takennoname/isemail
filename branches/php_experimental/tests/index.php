@@ -3,7 +3,7 @@
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<title>devpkg() - Build unit test script from test data</title>
+<title>is_email() - Build unit test script from test data</title>
 </head>
 
 <body>
@@ -15,7 +15,7 @@ $php = <<<PHP
 
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<title>devpkg() - Run unit tests</title>
+<title>is_email() - Run unit tests</title>
 
 <style type="text/css">
 div {clear:left;}
