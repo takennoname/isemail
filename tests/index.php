@@ -119,8 +119,8 @@ for ($i = 0; $i < $testList->length; $i++) {
 	}
 
 //-	$expected	= ($valid === 'true') ? true : false;
-	$needles	= array('\\0',	 '\\'		, '"'	, '$'	, chr(9)	,chr(10)	,chr(13), chr(0));
-	$substitutes	= array(chr(0), '\\\\'	, '\\"'	, '\\$'	, '\t'		,'\n'		,'\r', '\0');
+	$needles	= array('\\'		, '"'	, '$'	, chr(9)	,chr(10)	,chr(13), '[**NULL**]');
+	$substitutes	= array('\\\\'	, '\\"'	, '\\$'	, '\t'		,'\n'		,'\r', '\0');
 	$address	= str_replace($needles, $substitutes, $address);
 	$comment	= str_replace($needles, $substitutes, $comment);
 
