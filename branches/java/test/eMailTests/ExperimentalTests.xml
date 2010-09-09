@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE tests>
 	<!--
-		Umlaute sind nicht erlaubt Anmerkung: Die Übersetzung in den Punnycode
-		muss durch den Clienten stattfinden TODO: Sollen diese Adressen
-		trotzdem zugelassen werden? * müller@compuglobal.org" => false *
-		"test@müller.de" => false * "müller@müllermilch.de" => false
+		Umlaute sind nicht erlaubt.
+		Anmerkung: Die Übersetzung in den Punnycode
+		muss durch den Clienten stattfinden
+		TODO: Sollen diese Adressen
+		trotzdem zugelassen werden?
+		* "müller@compuglobal.org" => false
+		* "test@müller.de" => false
+		* "müller@müllermilch.de" => false
 	-->
 <tests xmlns="http://www.w3.org/2001/XMLSchema-instance"
 	SchemaLocation="mailValidatorTests.xsd">
 	<test>
-		<addresse>info@compuglobal.org</addresse>
+		<address>info@compuglobal.org</address>
 		<valid>true</valid>
 		<source />
 		<comment />
