@@ -52,7 +52,7 @@ public class IsEMail {
 	 * @return True if the email address is valid.
 	 */
 	public static boolean is_email(String email) {
-		return (is_email_diagnosis(email, false) == EMailSyntaxDiagnosis.ISEMAIL_VALID);
+		return (is_email_diagnosis(email, false).getState() == GeneralState.OK);
 	}
 
 	/**
@@ -642,7 +642,7 @@ public class IsEMail {
 	 * @return The new String
 	 * @see Source: http://www.rgagnon.com/javadetails/java-0030.html
 	 */
-	public static String replaceCharAt(String s, int pos, char c) {
+	private static String replaceCharAt(String s, int pos, char c) {
 		return s.substring(0, pos) + c + s.substring(pos + 1);
 	}
 
