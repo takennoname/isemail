@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tests version="2.1">
+<!DOCTYPE tests>
+<tests version="2.1" xmlns="http://www.w3.org/2001/XMLSchema-instance"
+	SchemaLocation="mailValidatorTests.xsd">
 	<test>
 		<address>first.last@example.com</address>
 		<valid>true</valid>

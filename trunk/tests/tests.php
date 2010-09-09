@@ -15,13 +15,24 @@ p.address {text-align:right;width:400px;overflow:hidden;margin-right:8px;}
 p.id {text-align:right;width:40px;overflow:hidden;margin-right:8px;}
 p.author {font-style:italic;}
 hr {clear:left;}
+#conclusion {color:blue;}
 </style>
 </head>
 
 <body>
 <?php
-require_once '../devpkg.php';
+if (file_exists('../devpkg.php')) {
+	require_once '../devpkg.php';
+} else {
+	require_once '../is_email.php';
+	function devpkg($email, $checkDNS = false, $errorlevel = false) {
+		return is_email($email, $checkDNS, $errorlevel);
+	}
+}
 require_once '../extras/is_email_statustext.php';
+
+$success_count = 0;
+$fail_count = 0;
 
 function unitTest ($email, $expected, $warn_expected, $comment = '', $id = '') {
 	$diagnosis	= devpkg($email, false, true);
@@ -30,23 +41,37 @@ function unitTest ($email, $expected, $warn_expected, $comment = '', $id = '') {
 	$warn		= (($diagnosis & ISEMAIL_WARNING) !== 0);
 	$valid		= ($diagnosis < ISEMAIL_ERROR);
 
-	$warning	= ($warn) ? $diagnosis : '&nbsp;';
+	$warning	= ($warn) ? 'Yes' : 'No';
 	$result		= ($valid) ? 'Valid' : 'Not valid';
 
-	if ($valid	!== $expected)		$result		= "<strong>$result</strong>";
-	if ($warn	!== $warn_expected)	$warning	= "<strong>$warning</strong>";
-
+	$test_ok = true;
+	if ($valid	!== $expected) {
+		$result		= "<strong>$result</strong>";
+		$test_ok = false;
+	}
+	if ($warn	!== $warn_expected) {
+		$warning	= "<strong>$warning</strong>";
+		$test_ok = false;
+	}
+	if ($test_ok) {
+		global $success_count;
+		$success_count++;
+	} else {
+		global $fail_count;
+		$fail_count++;
+	}
+	
 	$comment	= stripslashes($comment);
 
 	if ($text !== '')	$comment .= ($comment === '') ? stripslashes($text) : ' (' . stripslashes($text) . ')';
 	if ($comment === '')	$comment = "&nbsp;";
 
-	return "<div><p class=\"address\"<em>$email</em></p><p class=\"id\">$id</p><p class=\"valid\">$result</p><p class=\"warning\">$warning</p><p class=\"diagnosis\">$diagnosis</p><p class=\"comment\">$comment</p></div>\n";
+	return "<div><p class=\"address\"<em>$email</em></p><p class=\"id\">$id</p><p class=\"valid\">$result</p><p class=\"warning\">$warning</p><p class=\"diagnosis\">$diagnosis</p><p class=\"comment\">$comment</p></div>\r\n";
 }
 
-echo "<h3>Email address validation test suite version 2.1</h3>\n";
-echo "<p class=\"author\">Dominic Sayers | <a href=\"mailto:dominic@sayers.cc\">dominic@sayers.cc</a> | <a href=\"http://www.dominicsayers.com/isemail\">RFC-compliant email address validation</a></p>\n<br>\n<hr>\n";
-echo "<div><p class=\"address\"<strong>Address</strong></p><p class=\"id\"><strong>Test #</strong></p><p class=\"valid\"><strong>Result</strong></p><p class=\"warning\"><strong>Warning</strong></p><p class=\"diagnosis\"><strong>Diagnosis</strong></p><p class=\"comment\"><strong>Comment</strong></p></div>\n";echo unitTest("first.last@example.com", true, false, "", "1");
+echo "<h3>Email address validation test suite version 2.1</h3>\r\n";
+echo "<p class=\"author\">Dominic Sayers | <a href=\"mailto:dominic@sayers.cc\">dominic@sayers.cc</a> | <a href=\"http://www.dominicsayers.com/isemail\">RFC-compliant email address validation</a></p>\r\n<br>\r\n<hr>\r\n";
+echo "<div><p class=\"address\"<strong>Address</strong></p><p class=\"id\"><strong>Test #</strong></p><p class=\"valid\"><strong>Result</strong></p><p class=\"warning\"><strong>Warning</strong></p><p class=\"diagnosis\"><strong>Diagnosis</strong></p><p class=\"comment\"><strong>Comment</strong></p></div>\r\n";echo unitTest("first.last@example.com", true, false, "", "1");
 echo unitTest("1234567890123456789012345678901234567890123456789012345678901234@example.com", true, false, "", "2");
 echo unitTest("first.last@sub.do,com", false, false, "Mistyped comma instead of dot (replaces old #3 which was the same as #57)", "3");
 echo unitTest("\"first\\\"last\"@example.com", true, true, "", "4");
@@ -271,9 +296,9 @@ echo unitTest(" \r\n (\r\n x \r\n ) \r\n first\r\n ( \r\n x\r\n ) \r\n .\r\n ( \
 echo unitTest("test. \r\n \r\n obs@syntax.com", true, true, "obs-fws allows multiple lines", "223");
 echo unitTest("test. \r\n \r\n obs@syntax.com", true, true, "obs-fws allows multiple lines (test 2: space before break)", "224");
 echo unitTest("test.\r\n\r\n obs@syntax.com", false, false, "obs-fws must have at least one WSP per line", "225");
-echo unitTest("\"null \\ \"@char.com", true, true, "can have escaped null character", "226");
-echo unitTest("\"null  \"@char.com", false, false, "cannot have unescaped null character", "227");
-echo unitTest("null\\ @char.com", false, false, "escaped null must be in quoted string", "228");
+echo unitTest("\"null \\\0\"@char.com", true, true, "can have escaped null character", "226");
+echo unitTest("\"null \0\"@char.com", false, false, "cannot have unescaped null character", "227");
+echo unitTest("null\\\0@char.com", false, false, "escaped null must be in quoted string", "228");
 echo unitTest("cdburgess+!#\$%&'*-/=?+_{}|~test@gmail.com", true, false, "Example given in comments", "229");
 echo unitTest("first.last@[IPv6:::a2:a3:a4:b1:b2:b3:b4]", true, true, ":: only elides one zero group (IPv6 authority is RFC 4291)", "230");
 echo unitTest("first.last@[IPv6:a1:a2:a3:a4:b1:b2:b3::]", true, true, ":: only elides one zero group (IPv6 authority is RFC 4291)", "231");
@@ -321,6 +346,8 @@ echo unitTest("first.last@[IPv6:a1::b3:]", false, true, "IPv6 authority is RFC 4
 echo unitTest("first.last@[IPv6::a2::b4]", false, true, "IPv6 authority is RFC 4291", "273");
 echo unitTest("first.last@[IPv6:a1:a2:a3:a4:b1:b2:b3:]", false, true, "IPv6 authority is RFC 4291", "274");
 echo unitTest("first.last@[IPv6::a2:a3:a4:b1:b2:b3:b4]", false, true, "IPv6 authority is RFC 4291", "275");
+
+echo "<div id=\"conclusion\"><p><strong>Success = $success_count<br>Failures = $fail_count</strong></p></div>";
 ?>
 </body>
 
