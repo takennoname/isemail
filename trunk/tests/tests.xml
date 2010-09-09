@@ -1934,7 +1934,7 @@
 		<id>225</id>
 	</test>
 	<test>
-		<address>"null \\0"@char.com</address>
+		<address>"null \[**NULL**]"@char.com</address>
 		<valid>true</valid>
 		<warning>true</warning>
 		<comment>can have escaped null character</comment>
@@ -1943,7 +1943,7 @@
 		<id>226</id>
 	</test>
 	<test>
-		<address>"null \0"@char.com</address>
+		<address>"null [**NULL**]"@char.com</address>
 		<valid>false</valid>
 		<warning>false</warning>
 		<comment>cannot have unescaped null character</comment>
@@ -1952,7 +1952,7 @@
 		<id>227</id>
 	</test>
 	<test>
-		<address>null\\0@char.com</address>
+		<address>null\[**NULL**]@char.com</address>
 		<valid>false</valid>
 		<warning>false</warning>
 		<comment>escaped null must be in quoted string</comment>
