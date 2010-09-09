@@ -33,21 +33,14 @@ hr {clear:left;}
 
 <body>
 <?php
-if (file_exists('../devpkg.php')) {
-	require_once '../devpkg.php';
-} else {
-	require_once '../is_email.php';
-	function devpkg(\$email, \$checkDNS = false, \$errorlevel = false) {
-		return is_email(\$email, \$checkDNS, \$errorlevel);
-	}
-}
+require_once '../is_email.php';
 require_once '../extras/is_email_statustext.php';
 
 \$success_count = 0;
 \$fail_count = 0;
 
 function unitTest (\$email, \$expected, \$warn_expected, \$comment = '', \$id = '') {
-	\$diagnosis	= devpkg(\$email, false, true);
+	\$diagnosis	= is_email(\$email, false, true);
 	\$text		= is_email_statustext(\$diagnosis);
 
 	\$warn		= ((\$diagnosis & ISEMAIL_WARNING) !== 0);
@@ -72,7 +65,7 @@ function unitTest (\$email, \$expected, \$warn_expected, \$comment = '', \$id = 
 		global \$fail_count;
 		\$fail_count++;
 	}
-	
+
 	\$comment	= stripslashes(\$comment);
 
 	if (\$text !== '')	\$comment .= (\$comment === '') ? stripslashes(\$text) : ' (' . stripslashes(\$text) . ')';

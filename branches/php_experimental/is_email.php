@@ -1,13 +1,13 @@
 <?php
 /**
  * To validate an email address according to RFCs 5321, 5322 and others
- * 
+ *
  * Copyright (c) 2008-2010, Dominic Sayers							<br>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- * 
+ *
  *     - Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimer.
  *     - Redistributions in binary form must reproduce the above copyright notice,
@@ -16,7 +16,7 @@
  *     - Neither the name of Dominic Sayers nor the names of its contributors may be
  *       used to endorse or promote products derived from this software without
  *       specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,7 +27,7 @@
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * @package	is_email
  * @author	Dominic Sayers <dominic@sayers.cc>
  * @copyright	2008-2010 Dominic Sayers
@@ -64,7 +64,7 @@
 	//
 	//	Errors can be distinguished from warnings if ($return_value > ISEMAIL_ERROR)
 // version 2.0: Enhance $diagnose parameter to $errorlevel
-					
+
 	if (!defined('ISEMAIL_VALID')) {
 		// No errors
 		define('ISEMAIL_VALID'			, 0);
@@ -143,7 +143,7 @@
 	if ($atIndex === 0)			return $diagnose ? ISEMAIL_NOLOCALPART	: false;	// No local part
 	if ($atIndex === $emailLength - 1)	return $diagnose ? ISEMAIL_NODOMAIN	: false;	// No domain part
 // revision 1.14: Length test bug suggested by Andrew Campbell of Gloucester, MA
-	
+
 	// Sanitize comments
 	// - remove nested comments, quotes and dots in comments
 	// - remove parentheses and dots from quoted strings
@@ -204,7 +204,7 @@
 	// 	(http://tools.ietf.org/html/rfc5322#section-3.4.1)
 	//
 	// Problem: need to distinguish between "first.last" and "first"."last"
-	// (i.e. one element or two). And I suck at regexes.
+	// (i.e. one element or two). And I suck at regular expressions.
 	$dotArray	= /*. (array[int]string) .*/ preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
 	$partLength	= 0;
 
@@ -214,7 +214,7 @@
 		$elementLength	= strlen($element);
 
 		if ($elementLength === 0)								return $diagnose ? ISEMAIL_ZEROLENGTHELEMENT	: false;	// Can't have empty element (consecutive dots or dots at the start or end)
-// revision 1.15: Speed up the test and get rid of "unitialized string offset" notices from PHP
+// revision 1.15: Speed up the test and get rid of "uninitialized string offset" notices from PHP
 
 		// We need to remove any valid comments (i.e. those at the start or end of the element)
 		if ($element[0] === '(') {
@@ -228,7 +228,7 @@
 				$elementLength	= strlen($element);
 			}
 		}
-		
+
 		if ($element[$elementLength - 1] === ')') {
 			if ($warn) $return_status = ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
 // version 2.0: Warning condition added
@@ -259,7 +259,7 @@
 // version 2.0: Warning condition added
 			// Remove any FWS
 			$element = preg_replace("/(?<!\\\\)$FWS/", '', $element);
-			// My regex skillz aren't up to distinguishing between \" \\" \\\" \\\\" etc.
+			// My regular expressions skills aren't up to distinguishing between \" \\" \\\" \\\\" etc.
 			// So remove all \\ from the string first...
 			$element = preg_replace('/\\\\\\\\/', ' ', $element);
 			if (preg_match('/(?<!\\\\|^)["\\r\\n\\x00](?!$)|\\\\"$|""/', $element) > 0)	return $diagnose ? ISEMAIL_UNESCAPEDDELIM	: false;	// ", CR, LF and NUL must be escaped
@@ -303,11 +303,11 @@
 		$groupMax	= 8;
 // revision 2.1: new IPv6 testing strategy
 		$matchesIP	= array();
-		
+
 		// Extract IPv4 part from the end of the address-literal (if there is one)
 		if (preg_match('/\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/', $addressLiteral, $matchesIP) > 0) {
 			$index = strrpos($addressLiteral, $matchesIP[0]);
-			
+
 			if ($index === 0) {
 				// Nothing there except a valid IPv4 address, so...
 				return ($diagnose) ? $return_status : true;
@@ -400,13 +400,13 @@
 			$element = $new_element;
 // version 2.0: Warning condition added
 			$elementLength	= strlen($element);
-	
+
 			// Each dot-delimited component must be of type atext
 			// A zero-length element implies a period at the beginning or end of the
 			// local part, or two periods together. Either way it's not allowed.
 			if ($elementLength === 0)							return $diagnose ? ISEMAIL_DOMAINEMPTYELEMENT	: false;	// Dots in wrong place
-// revision 1.15: Speed up the test and get rid of "unitialized string offset" notices from PHP
-	
+// revision 1.15: Speed up the test and get rid of "uninitialized string offset" notices from PHP
+
 			// Then we need to remove all valid comments (i.e. those at the start or end of the element
 			if ($element[0] === '(') {
 				if ($warn) $return_status = ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
@@ -420,7 +420,7 @@
 					$elementLength	= strlen($element);
 				}
 			}
-			
+
 			if ($element[$elementLength - 1] === ')') {
 				if ($warn) $return_status = ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
 // version 2.0: Warning condition added
@@ -432,25 +432,25 @@
 					$element	= substr($element, 0, $indexBrace);
 					$elementLength	= strlen($element);
 				}
-			}			
-	
+			}
+
 			// Remove any leading or trailing FWS around the element (inside any comments)
 			$new_element	= preg_replace("/^$FWS|$FWS\$/", '', $element);
 			if ($warn && ($element !== $new_element)) $return_status = ISEMAIL_FWS;	// FWS is unlikely in the real world
 			$element = $new_element;
 // version 2.0: Warning condition added
-	
+
 			// What's left counts towards the maximum length for this part
 			if ($partLength > 0) $partLength++;	// for the dot
 			$partLength += strlen($element);
-	
+
 			// The DNS defines domain name syntax very generally -- a
 			// string of labels each containing up to 63 8-bit octets,
 			// separated by dots, and with a maximum total of 255
 			// octets.
 			// 	(http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
 			if ($elementLength > 63)							return $diagnose ? ISEMAIL_DOMAINELEMENTTOOLONG	: false;	// Label must be 63 characters or less
-	
+
 			// Any ASCII graphic (printing) character other than the
 			// at-sign ("@"), backslash, double quote, comma, or square brackets may
 			// appear without quoting.  If any of that list of excluded characters

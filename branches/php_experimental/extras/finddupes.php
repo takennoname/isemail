@@ -10,7 +10,7 @@
 
 <?php
 
-// require_once '../devpkg.php';
+// require_once '../is_email.php';
 
 $addresses		= array();
 $ids			= array();
@@ -48,7 +48,7 @@ for ($i = 0; $i < $testList->length; ++$i) {
 		$duplicates['addressIDs'][]	= $id;
 	} else {
 		$addresses[]				= $address;
-		
+
 		//	Add ID if it hasn't got one
 		if (!isset($id)) {
 			$dirty = true;
