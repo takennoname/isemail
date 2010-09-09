@@ -9,7 +9,8 @@
 <body>
 
 <?php
-require_once '../devpkg.php';				//	Dominic Sayers
+
+// require_once '../devpkg.php';
 
 $addresses		= array();
 $ids			= array();
@@ -22,7 +23,7 @@ $dirty 			= false;
 
 $document		= new DOMDocument();
 
-$document->load('tests.xml');
+$document->load('../tests/tests.xml');
 
 $tests		= $document->getElementsByTagName('tests')->item(0);
 $version	= $tests->getAttribute("version");
