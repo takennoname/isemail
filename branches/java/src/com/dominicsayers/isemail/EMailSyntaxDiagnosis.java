@@ -17,7 +17,7 @@ public enum EMailSyntaxDiagnosis {
 	
 	// References to original source:
 	// (r22) trunk/extras/is_email_statustext.php
-	// (r25) svn/trunk/is_email.php
+	// (r25) trunk/is_email.php
 
 	// No errors
     ISEMAIL_VALID(0, GeneralState.OK, "Address is valid"),

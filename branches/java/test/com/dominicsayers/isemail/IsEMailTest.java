@@ -17,17 +17,18 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class IsEMailTest {
-	
+
 	static int errorCount;
-	
-	private void checkXML(String xmlFile) throws ParserConfigurationException, SAXException, IOException {
+
+	private void checkXML(String xmlFile) throws ParserConfigurationException,
+			SAXException, IOException {
 		File file = new File(xmlFile);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		Document doc = db.parse(file);
 		doc.getDocumentElement().normalize();
 		NodeList nodeLst = doc.getElementsByTagName("test");
-		
+
 		for (int s = 0; s < nodeLst.getLength(); s++) {
 
 			Node fstNode = nodeLst.item(s);
@@ -53,6 +54,9 @@ public class IsEMailTest {
 				} catch (NullPointerException e) {
 					cont = "";
 				}
+				cont = cont.trim(); // Ctrl+Shift+F in Eclipse brings TABs into XML...
+				// cont = PHPFunctions.stripcslashes(cont); // TODO ...
+				cont = cont.replace("[**NULL**]", "\u0000");
 				address = cont;
 
 				fstNmElmntLst = fstElmnt.getElementsByTagName("valid");
@@ -68,13 +72,14 @@ public class IsEMailTest {
 				id = cont;
 
 				boolean actual = IsEMail.is_email(address);
-				EMailSyntaxDiagnosis diagnosis = IsEMail.is_email_diagnosis(address);
+				EMailSyntaxDiagnosis diagnosis = IsEMail
+						.is_email_diagnosis(address);
 
 				// assertEquals(expected, actual);
 				if (expected != actual) {
 					System.err.println("Mail Test #" + id + " FAILED! '"
-							+ address + "' is '" + actual + "' ('" + diagnosis + "') instead of '"
-							+ expected + "'!");
+							+ address + "' is '" + actual + "' ('" + diagnosis
+							+ "') instead of '" + expected + "'!");
 					errorCount++;
 				}
 			}
@@ -85,14 +90,14 @@ public class IsEMailTest {
 	public void performXMLTests() throws SAXException, IOException,
 			ParserConfigurationException {
 
-		// First: Null-Pointer Test 
-		
+		// First: Null-Pointer Test
+
 		IsEMail.is_email(null);
-		
+
 		// Now check the XML testcases
-		
+
 		checkXML("test/eMailTests/SayersTests.xml");
-		checkXML("test/eMailTests/ExperimentalTests.xml");
+		// TODO: checkXML("test/eMailTests/ExperimentalTests.xml");
 
 		if (errorCount > 0) {
 			System.err.println("==> " + errorCount + " ERRORS OCCOURED! <==");
