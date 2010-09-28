@@ -2,7 +2,9 @@
 <!DOCTYPE tests>
 	<!--
 		Source: http://isemail.googlecode.com/svn/trunk/tests/tests.xml (r18)
-		Attention to test #227. Workaround for JAVA!
+		[**NULL**] will be replaced with NUL-character
+		Everything is is NOT C-slash escaped, means "\n" does really mean "\" and "n", not LF.
+		Warning: Do not use Ctrl+Shift+F inside Eclipse!
 	-->
 <tests version="1.10" xmlns="http://www.w3.org/2001/XMLSchema-instance"
 	SchemaLocation="mailValidatorTests.xsd">
@@ -1713,7 +1715,7 @@
 		<id>225</id>
 	</test>
 	<test>
-		<address>"null \\0"@char.com</address>
+		<address>"null \[**NULL**]"@char.com</address>
 		<valid>true</valid>
 		<comment>can have escaped null character</comment>
 		<source>George Pollard</source>
@@ -1729,7 +1731,7 @@
 		<id>227</id>
 	</test>
 	<test>
-		<address>null\\0@char.com</address>
+		<address>null\[**NULL**]@char.com</address>
 		<valid>false</valid>
 		<comment>escaped null must be in quoted string</comment>
 		<source>George Pollard</source>

@@ -54,10 +54,8 @@ public class IsEMailTest {
 				} catch (NullPointerException e) {
 					cont = "";
 				}
-				cont = cont.trim(); // Ctrl+Shift+F in Eclipse brings TABs into XML...
-				// cont = PHPFunctions.stripcslashes(cont); // TODO ...
-				cont = cont.replace("[**NULL**]", "\u0000");
 				address = cont;
+				address = address.replace("\u2400", "\u0000");
 
 				fstNmElmntLst = fstElmnt.getElementsByTagName("valid");
 				fstNmElmnt = (Element) fstNmElmntLst.item(0);
