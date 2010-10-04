@@ -35,7 +35,7 @@
 		case ISEMAIL_IPV6BADPREFIX:		return 'The literal address is wrongly prefixed';								break;	// 142
 		case ISEMAIL_IPV6GROUPCOUNT:		return 'The IPv6 literal address contains the wrong number of groups';						break;	// 143
 		case ISEMAIL_IPV6DOUBLEDOUBLECOLON:	return 'The IPv6 literal address contains too many :: sequences';						break;	// 144
-		case ISEMAIL_IPV6BADCHAR:		return 'The IPv6 address contains an illegal character';							break;	// 145
+		case ISEMAIL_IPV6BADCHAR:		return 'The IPv6 address contains an illegal group of characters';						break;	// 145 Revision 2.8: text amended to more accurately reflect the error condition
 		case ISEMAIL_IPV6TOOMANYGROUPS:		return 'The IPv6 address has too many groups';									break;	// 146
 		case ISEMAIL_DOMAINEMPTYELEMENT:	return 'The domain part contains an empty element';								break;	// 147
 		case ISEMAIL_DOMAINELEMENTTOOLONG:	return 'The domain part contains an element that is too long';							break;	// 148

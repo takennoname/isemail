@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 Version	Date		Notes
+2.5	2010-10-04	My mum's birthday. Happy birthday, mum. Added test #276
+			to test missing outcome of ISEMAIL_IPV6TOOMANYGROUPS. Thanks
+			to Daniel Marschall for suggesting this.
+
 2.4	2010-10-01	In test #63 the status of the domain us.ibm.com is
 			somewhat unclear. It doesn't appear to have an A
 			record of its own so we are expecting a warning.
@@ -2411,5 +2415,14 @@ Version	Date		Notes
 		<source>Dominic Sayers</source>
 		<sourcelink>http://www.dominicsayers.com/isemail</sourcelink>
 		<id>275</id>
+	</test>
+	<test>
+		<address>first.last@[IPv6:a1:a2:a3:a4::b1:b2:b3:b4]</address>
+		<valid>false</valid>
+		<warning>false</warning>
+		<comment>IPv6 authority is RFC 4291</comment>
+		<source>Daniel Marschall</source>
+		<sourcelink>http://www.dominicsayers.com/isemail</sourcelink>
+		<id>276</id>
 	</test>
 </tests>
