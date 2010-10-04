@@ -3,6 +3,46 @@ Copyright 2008-2010 Dominic Sayers <dominic@sayers.cc>
 http://www.dominicsayers.com/isemail
 BSD License (http://www.opensource.org/licenses/bsd-license.php)
 
+--------------------------------------------------------------------------------
+How to use is_email()
+--------------------------------------------------------------------------------
+1. Add the downloaded file is_email.php to your project
+2. In your scripts use it like this:
+
+	require_once 'is_email.php';
+	if (is_email($address)) echo "$address is a valid email address";
+
+3. If you want to return detailed diagnostic error codes then you can ask
+is_email to do this. Something like this should work:
+
+	require_once 'is_email.php';
+
+	$address = 'dominic@sayers.cc';
+
+	$result = is_email($address, true, E_WARNING);
+
+	if ($result === ISEMAIL_VALID) {
+		echo "$address is a valid email address";
+	} else if ($result < ISEMAIL_ERROR) {
+		echo "Warning! $address may not be a real email address (result code $result)";
+	} else {
+		echo "$address is not a valid email address (result code $result)";
+	}
+
+4. Example scripts are in the extras folder
+
+--------------------------------------------------------------------------------
+Version history
+--------------------------------------------------------------------------------
+
+// Revision 2.8: is_email_statustext.php text amended to more accurately reflect the error condition of ISEMAIL_IPV6BADCHAR
+
+Test suite version 2.5
+	2010-10-04	My mum's birthday. Happy birthday, mum. Added test #276
+			to test missing outcome of ISEMAIL_IPV6TOOMANYGROUPS. Thanks
+			to Daniel Marschall for suggesting this.
+
+
 // Revision 2.7: Daniel Marschall's new IPv6 testing strategy
 
 Test suite version 2.4
