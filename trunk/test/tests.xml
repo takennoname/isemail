@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE tests>
 <!--
+If you update these tests, don't forget to change the actual version number
+attribute in the <tests> element below!
+
 Version	Date		Notes
 2.5	2010-10-04	My mum's birthday. Happy birthday, mum. Added test #276
 			to test missing outcome of ISEMAIL_IPV6TOOMANYGROUPS. Thanks
