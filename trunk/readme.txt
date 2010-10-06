@@ -1,4 +1,4 @@
-﻿is_email()
+is_email()
 Copyright 2008-2010 Dominic Sayers <dominic@sayers.cc>
 http://www.dominicsayers.com/isemail
 BSD License (http://www.opensource.org/licenses/bsd-license.php)
