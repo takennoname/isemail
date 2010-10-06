@@ -34,7 +34,7 @@ Version	Date		Notes
 			in a similar way. Where the test is still for a non-
 			existent domain I've changed the expectation to Warning
 -->
-<tests version="2.4" xmlns="http://www.w3.org/2001/XMLSchema-instance"
+<tests version="2.5" xmlns="http://www.w3.org/2001/XMLSchema-instance"
 		SchemaLocation="tests.xsd">
 	<test>
 		<address>first.last@iana.org</address>
