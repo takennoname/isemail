@@ -1,7 +1,7 @@
 package com.dominicsayers.isemail;
 
 /**
- * This enumeration divides between the main parts of diagnosis.
+ * This enumeration divides between the main parts of verbose information.
  * 
  * @package isemail
  * @author Daniel Marschall [www.daniel-marschall.de]

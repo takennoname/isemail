@@ -85,23 +85,23 @@ public class IsEMailTest {
 				cont = ((Node) fstNm.item(0)).getNodeValue();
 				id = cont;
 
-				EMailSyntaxDiagnosis diagnosis = IsEMail
-						.is_email_diagnosis(address, true);
+				IsEMailResult result = IsEMail
+						.is_email_verbose(address, true);
 				
-				boolean actual_valid = (diagnosis.getState() != GeneralState.ERROR);
+				boolean actual_valid = (result.getState() != GeneralState.ERROR);
 
 				if (expected_valid != actual_valid) {
 					System.err.println("Mail Test #" + id + " FAILED (Wrong validity)! '"
-							+ address + "' is '" + actual_valid + "' ('" + diagnosis
+							+ address + "' is '" + actual_valid + "' ('" + result
 							+ "') instead of '" + expected_valid + "'!");
 					errorCount++;
 				}
 
-				boolean actual_warning = (diagnosis.getState() == GeneralState.WARNING);
+				boolean actual_warning = (result.getState() == GeneralState.WARNING);
 
 				if (expected_warning != actual_warning) {
 					System.err.println("Mail Test #" + id + " FAILED (Warning wrong)! '"
-							+ address + "' is '" + actual_warning + "' ('" + diagnosis
+							+ address + "' is '" + actual_warning + "' ('" + result
 							+ "') instead of '" + expected_warning + "'!");
 					errorCount++;
 				}

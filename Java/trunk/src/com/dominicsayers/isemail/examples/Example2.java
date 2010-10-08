@@ -2,7 +2,7 @@ package com.dominicsayers.isemail.examples;
 
 import java.util.Scanner;
 
-import com.dominicsayers.isemail.EMailSyntaxDiagnosis;
+import com.dominicsayers.isemail.IsEMailResult;
 import com.dominicsayers.isemail.IsEMail;
 import com.dominicsayers.isemail.dns.DNSLookupException;
 
@@ -30,7 +30,7 @@ public class Example2 {
 
 		// check the email address
 
-		EMailSyntaxDiagnosis result = IsEMail.is_email_diagnosis(email,
+		IsEMailResult result = IsEMail.is_email_verbose(email,
 				CHECK_DNS);
 
 		switch (result.getState()) {
@@ -41,23 +41,20 @@ public class Example2 {
 		case WARNING:
 			System.out.println("Warning! " + email
 					+ " may not be a real email address!");
-			System.out.println("Diagnosis ID:\t\t" + result.getId());
-			System.out.println("Diagnosis Label:\t" + result.toString());
-			System.out.println("Diagnosis Text:\t\t"
-					+ result.getDiagnosisText());
-
 			break;
 
 		case ERROR:
 			System.out.println(email + " is NOT a real email address!");
-			System.out.println("Diagnosis ID:\t\t" + result.getId());
-			System.out.println("Diagnosis Label:\t" + result.toString());
-			System.out.println("Diagnosis Text:\t\t"
-					+ result.getDiagnosisText());
-
 			break;
 		}
 
+		System.out.println("Result ID:\t\t" + result.getId());
+		System.out.println("Result Enumeration:\t" + result.getConstantName());
+		System.out.println("Result String:\t" + result.toString());
+		System.out.println("Result Text:\t\t"
+				+ result.getStatusTextExplanatory());
+		System.out.println("SMTP code:\t\t" + result.getSmtpCode());
+		System.out.println("SMTP code with text:\t" + result.getSmtpCodeText());
 	}
 
 }
