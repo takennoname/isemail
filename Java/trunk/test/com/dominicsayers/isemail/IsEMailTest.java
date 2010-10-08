@@ -16,11 +16,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.dominicsayers.isemail.dns.DNSLookupException;
+
 /**
  * Tests for the class IsEMailTest.
  * 
  * @author Daniel Marschall
- * @version 2010-10-06
+ * @version 2010-10-08
  */
 
 public class IsEMailTest {
@@ -28,7 +30,7 @@ public class IsEMailTest {
 	static int errorCount;
 
 	private void checkXML(String xmlFile) throws ParserConfigurationException,
-			SAXException, IOException {
+			SAXException, IOException, DNSLookupException {
 		File file = new File(xmlFile);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
@@ -109,7 +111,7 @@ public class IsEMailTest {
 
 	@Test
 	public void performXMLTests() throws SAXException, IOException,
-			ParserConfigurationException {
+			ParserConfigurationException, DNSLookupException {
 
 		// First: Null-Pointer Test
 

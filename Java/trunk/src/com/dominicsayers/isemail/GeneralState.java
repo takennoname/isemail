@@ -8,7 +8,7 @@ package com.dominicsayers.isemail;
  * @copyright 2010 by Daniel Marschall
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @see http://www.dominicsayers.com/isemail
- * @version 2010-10-06
+ * @version 2010-10-08
  */
 
 public enum GeneralState {
@@ -21,6 +21,12 @@ public enum GeneralState {
 
 	boolean isValid;
 
+	/**
+	 * Determinates if the email address is valid or not. Warnings get ignored.
+	 * 
+	 * @return true if the general state is either OK or WARNING.<br>
+	 *         false on ERROR.
+	 */
 	public boolean isValid() {
 		return this.isValid;
 	}

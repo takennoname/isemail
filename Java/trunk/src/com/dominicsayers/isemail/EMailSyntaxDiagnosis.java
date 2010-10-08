@@ -12,7 +12,8 @@ package com.dominicsayers.isemail;
  *         Java-Translation 2010 by Daniel Marschall
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @see http://www.dominicsayers.com/isemail
- * @version Java-Translation of is_email_statustext.php:r43 and
+ * @version 2010-10-08.
+ *          Java-Translation of is_email_statustext.php:r43 and
  *                              is_email.php:r44
  */
 
@@ -71,25 +72,41 @@ public enum EMailSyntaxDiagnosis {
 	// ----------------------------------------------------------------------------
 	
 	@Deprecated
-	private int id; // The ID is obsolete in Java version and is only used in original PHP code
+	private int id;
 	private GeneralState state;
 	private String diagnosisText;
 
-	private EMailSyntaxDiagnosis(int id, GeneralState state, String diagnosisText) {
+	private EMailSyntaxDiagnosis(int id, GeneralState state,
+			String diagnosisText) {
 		this.id = id;
 		this.state = state;
 		this.diagnosisText = diagnosisText;
 	}
-	
+
 	@Deprecated
+	/**
+	 * Outputs the ID of the diagnosis message. Not necessary in Java implementation, but useful for interacting with PHP branch.
+	 * @return The ID of the diagnosis message.
+	 */
 	public int getId() {
 		return id;
 	}
 
+	/**
+	 * Return the general state of the diagnosis result. This general state
+	 * tells you whether the address is OK or if warnings or errors appeared.
+	 * 
+	 * @return GeneralState that describes the diagnosis in general.
+	 */
 	public GeneralState getState() {
 		return state;
 	}
 
+	/**
+	 * Outputs the Text of the diagnosis.
+	 * 
+	 * @return The Text of the diagnosis.
+	 */
 	public String getDiagnosisText() {
 		return diagnosisText;
 	}

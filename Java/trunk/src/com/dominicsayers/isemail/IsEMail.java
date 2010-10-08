@@ -1,12 +1,13 @@
 package com.dominicsayers.isemail;
 
-import javax.naming.NamingException;
+import com.dominicsayers.isemail.dns.DNSLookup;
+import com.dominicsayers.isemail.dns.DNSLookupException;
 
 /**
  * To validate an email address according to RFCs 5321, 5322 and others
  * 
- * Copyright (c) 2008-2010, Dominic Sayers <br>
- * Test schema documentation Copyright (c) 2010, Daniel Marschall <br>
+ * Copyright © 2008-2010, Dominic Sayers <br>
+ * Test schema documentation Copyright © 2010, Daniel Marschall <br>
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -36,11 +37,11 @@ import javax.naming.NamingException;
  * @author Dominic Sayers <dominic@sayers.cc><br>
  *         Translated from PHP into Java by Daniel Marschall
  *         [www.daniel-marschall.de]
- * @copyright 2008-2010 Dominic Sayers;
- *         Java-Translation 2010 by Daniel Marschall
+ * @copyright 2008-2010 Dominic Sayers; Java-Translation 2010 by Daniel
+ *            Marschall
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link http://www.dominicsayers.com/isemail
- * @version Java-Translation of isemail.php:r44.
+ * @version 2010-10-08. Java-Translation of isemail.php:r46.
  */
 
 public class IsEMail {
@@ -51,8 +52,10 @@ public class IsEMail {
 	 * @param email
 	 *            The email address to be checked.
 	 * @return True if the email address is valid.
+	 * @throws DNSLookupException
+	 *             Is thrown if an internal error in the DNS lookup appeared.
 	 */
-	public static boolean is_email(String email) {
+	public static boolean is_email(String email) throws DNSLookupException {
 		return (is_email_diagnosis(email, false).getState().isValid);
 	}
 
@@ -64,8 +67,10 @@ public class IsEMail {
 	 * @param checkDNS
 	 *            Whether a DNS check should be performed or not.
 	 * @return True if the email address is valid.
+	 * @throws DNSLookupException
+	 *             Is thrown if an internal error in the DNS lookup appeared.
 	 */
-	public static boolean is_email(String email, boolean checkDNS) {
+	public static boolean is_email(String email, boolean checkDNS) throws DNSLookupException {
 		return (is_email_diagnosis(email, checkDNS).getState() == GeneralState.OK);
 	}
 
@@ -76,8 +81,10 @@ public class IsEMail {
 	 * @param email
 	 *            The email address to be checked.
 	 * @return A diagnosis of the email syntax.
+	 * @throws DNSLookupException
+	 *             Is thrown if an internal error in the DNS lookup appeared.
 	 */
-	public static EMailSyntaxDiagnosis is_email_diagnosis(String email) {
+	public static EMailSyntaxDiagnosis is_email_diagnosis(String email) throws DNSLookupException {
 		return is_email_diagnosis(email, false);
 	}
 
@@ -92,9 +99,11 @@ public class IsEMail {
 	 * @param checkDNS
 	 *            If true then a DNS check for A and MX records will be made
 	 * @return A diagnosis of the email syntax.
+	 * @throws DNSLookupException
+	 *             Is thrown if an internal error in the DNS lookup appeared.
 	 */
 	public static EMailSyntaxDiagnosis is_email_diagnosis(String email,
-			boolean checkDNS) {
+			boolean checkDNS) throws DNSLookupException {
 
 		// Translation note: $warn=true and $diagnosis=true , so this method
 		// will always output exact diagnosis code inclusive warnings. The other
@@ -691,21 +700,13 @@ public class IsEMail {
 			// Check DNS?
 			if ((checkDNS)
 					&& (return_status == EMailSyntaxDiagnosis.ISEMAIL_VALID)) {
-				try {
-					if (!((DNSLookup.doLookup(domain, DNSType.A) > 0))) {
-						// 'A' record for domain can't be found
-						return_status = EMailSyntaxDiagnosis.ISEMAIL_DOMAINNOTFOUND;
-					}
-				} catch (NamingException e) {
+				if (!DNSLookup.hasRecords(domain, "A")) {
+					// 'A' record for domain can't be found
 					return_status = EMailSyntaxDiagnosis.ISEMAIL_DOMAINNOTFOUND;
 				}
 
-				try {
-					if (!((DNSLookup.doLookup(domain, DNSType.MX) > 0))) {
-						// 'MX' record for domain can't be found
-						return_status = EMailSyntaxDiagnosis.ISEMAIL_MXNOTFOUND;
-					}
-				} catch (NamingException e) {
+				if (!DNSLookup.hasRecords(domain, "MX")) {
+					// 'MX' record for domain can't be found
 					return_status = EMailSyntaxDiagnosis.ISEMAIL_MXNOTFOUND;
 				}
 			}

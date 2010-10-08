@@ -2,7 +2,10 @@
 <!DOCTYPE tests>
 <!--
 
-COPY FROM PHP-BRANCH: tests.xml:r45.
+COPY FROM PHP-BRANCH: tests.xml:r46.
+
+If you update these tests, don't forget to change the actual version number
+attribute in the <tests> element below!
 
 Version	Date		Notes
 2.5	2010-10-04	My mum's birthday. Happy birthday, mum. Added test #276
