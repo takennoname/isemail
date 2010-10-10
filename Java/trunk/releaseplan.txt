@@ -1,0 +1,9 @@
+Create folder "IsEMail for Java". Add:
+	IsEMail.jar
+	readme.txt
+	source.txt
+	Folder examples
+		Delete .svn
+		Remove package lines at top
+Pack it as is_email_java.zip
+Release it under same name in GoogleCode
