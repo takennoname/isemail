@@ -91,10 +91,8 @@ public class IsEMail {
 	}
 
 	/**
-	 * Check that an email address conforms to RFCs 5321, 5322 and others. With
+	 * Checks that an email address conforms to RFCs 5321, 5322 and others. With
 	 * verbose information.
-	 * 
-	 * Check that an email address conforms to RFCs 5321, 5322 and others
 	 * 
 	 * @param email
 	 *            The email address to check

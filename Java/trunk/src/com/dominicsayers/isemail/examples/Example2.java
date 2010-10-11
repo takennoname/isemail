@@ -30,8 +30,7 @@ public class Example2 {
 
 		// check the email address
 
-		IsEMailResult result = IsEMail.is_email_verbose(email,
-				CHECK_DNS);
+		IsEMailResult result = IsEMail.is_email_verbose(email, CHECK_DNS);
 
 		switch (result.getState()) {
 		case OK:
@@ -50,11 +49,12 @@ public class Example2 {
 
 		System.out.println("Result ID:\t\t" + result.getId());
 		System.out.println("Result Enumeration:\t" + result.getConstantName());
-		System.out.println("Result String:\t" + result.toString());
+		System.out.println("Result String:\t\t" + result.toString());
 		System.out.println("Result Text:\t\t"
 				+ result.getStatusTextExplanatory());
-		System.out.println("SMTP code:\t\t" + result.getSmtpCode());
-		System.out.println("SMTP code with text:\t" + result.getSmtpCodeText());
+		System.out.println("ESMTP response code:\t" + result.getSmtpResponse().getEsmtpCode());
+		System.out.println("Old SMTP response code:\t" + result.getSmtpResponse().getOldCode());
+		System.out.println("SMTP response line:\t" + result.getSmtpResponse().toString());
 	}
 
 }

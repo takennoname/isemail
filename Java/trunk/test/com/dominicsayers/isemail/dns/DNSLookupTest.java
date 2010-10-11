@@ -1,4 +1,4 @@
-package com.dominicsayers.isemail;
+package com.dominicsayers.isemail.dns;
 
 import static org.junit.Assert.*;
 
@@ -15,7 +15,7 @@ import com.dominicsayers.isemail.dns.InvalidDNSTypeException;
  * @version 2010-10-08
  */
 
-public class MXLookupTest {
+public class DNSLookupTest {
 
 	@Test
 	public void doLookupTest() throws DNSLookupException {

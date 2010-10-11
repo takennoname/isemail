@@ -1,3 +1,8 @@
+Create JAR: ismeial\IsEMail.jar
+	Contents ONLY
+		src/com.dominicsayers.isemail
+		src/com.dominicsayers.isemail.dns
+		src/com.dominicsayers.isemail.intl
 Create folder "IsEMail for Java". Add:
 	IsEMail.jar
 	readme.txt

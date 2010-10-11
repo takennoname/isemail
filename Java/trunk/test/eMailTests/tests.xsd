@@ -3,6 +3,7 @@
 <!--
 
 COPY FROM PHP-BRANCH: tests.xsd:r62.
+Modified: warning.minOccours 1 => 0 (fallback compatibility)
 
 -->
 
@@ -64,7 +65,7 @@ COPY FROM PHP-BRANCH: tests.xsd:r62.
 						<xsd:element name="valid" type="xsd:boolean"
 							minOccurs="1" maxOccurs="1" />
 						<xsd:element name="warning" type="xsd:boolean"
-							minOccurs="1" maxOccurs="1" />
+							minOccurs="0" maxOccurs="1" />
 						<xsd:element name="source" type="xsd:string"
 							minOccurs="0" maxOccurs="1" />
 						<xsd:element name="comment" type="xsd:string"

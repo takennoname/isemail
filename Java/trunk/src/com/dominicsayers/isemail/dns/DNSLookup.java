@@ -4,6 +4,8 @@ import java.util.Hashtable;
 import javax.naming.*;
 import javax.naming.directory.*;
 
+import com.dominicsayers.isemail.intl.UniPunyCode;
+
 /**
  * This class performs DNS lookups.
  * 
@@ -44,6 +46,9 @@ public class DNSLookup {
 	 */
 	public static int doLookup(String hostName, String dnsType)
 			throws DNSLookupException {
+
+		// JNDI cannot take two-byte chars, so we convert the hostname into Punycode
+		hostName = UniPunyCode.toPunycodeIfPossible(hostName);
 
 		Hashtable<String, String> env = new Hashtable<String, String>();
 		env.put("java.naming.factory.initial",

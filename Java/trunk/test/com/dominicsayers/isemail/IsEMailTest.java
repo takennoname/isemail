@@ -22,7 +22,7 @@ import com.dominicsayers.isemail.dns.DNSLookupException;
  * Tests for the class IsEMailTest.
  * 
  * @author Daniel Marschall
- * @version 2010-10-08
+ * @version 2010-10-11
  */
 
 public class IsEMailTest {
@@ -50,6 +50,7 @@ public class IsEMailTest {
 				String address;
 				boolean expected_valid;
 				boolean expected_warning;
+				boolean checkWarning;
 
 				NodeList fstNmElmntLst;
 				Element fstNmElmnt;
@@ -75,9 +76,15 @@ public class IsEMailTest {
 
 				fstNmElmntLst = fstElmnt.getElementsByTagName("warning");
 				fstNmElmnt = (Element) fstNmElmntLst.item(0);
-				fstNm = fstNmElmnt.getChildNodes();
-				cont = ((Node) fstNm.item(0)).getNodeValue();
-				expected_warning = Boolean.parseBoolean(cont);
+				if (fstNmElmnt != null) {
+					checkWarning = true;
+					fstNm = fstNmElmnt.getChildNodes();
+					cont = ((Node) fstNm.item(0)).getNodeValue();
+					expected_warning = Boolean.parseBoolean(cont);
+				} else {
+					checkWarning = false;
+					expected_warning = false;
+				}
 
 				fstNmElmntLst = fstElmnt.getElementsByTagName("id");
 				fstNmElmnt = (Element) fstNmElmntLst.item(0);
@@ -92,18 +99,20 @@ public class IsEMailTest {
 
 				if (expected_valid != actual_valid) {
 					System.err.println("Mail Test #" + id + " FAILED (Wrong validity)! '"
-							+ address + "' is '" + actual_valid + "' ('" + result
+							+ address + "' is '" + actual_valid + "' ('" + result.getConstantName()
 							+ "') instead of '" + expected_valid + "'!");
 					errorCount++;
 				}
 
-				boolean actual_warning = (result.getState() == GeneralState.WARNING);
+				if (checkWarning) {
+					boolean actual_warning = (result.getState() == GeneralState.WARNING);
 
-				if (expected_warning != actual_warning) {
-					System.err.println("Mail Test #" + id + " FAILED (Warning wrong)! '"
-							+ address + "' is '" + actual_warning + "' ('" + result
-							+ "') instead of '" + expected_warning + "'!");
-					errorCount++;
+					if (expected_warning != actual_warning) {
+						System.err.println("Mail Test #" + id + " FAILED (Warning wrong)! '"
+								+ address + "' is '" + actual_warning + "' ('" + result.getConstantName()
+								+ "') instead of '" + expected_warning + "'!");
+						errorCount++;
+					}
 				}
 			}
 		}
@@ -120,7 +129,7 @@ public class IsEMailTest {
 		// Now check the XML testcases
 
 		checkXML("test/eMailTests/tests.xml");
-		// TODO: checkXML("test/eMailTests/ExperimentalTests.xml");
+		// TODO: checkXML("test/eMailTests/tests_alt.xml");
 
 		if (errorCount > 0) {
 			System.err.println("==> " + errorCount + " ERRORS OCCOURED! <==");
