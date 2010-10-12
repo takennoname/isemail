@@ -6,23 +6,23 @@ package com.dominicsayers.isemail.dns;
  * @author Daniel Marschall
  * @version 2010-10-08
  */
-public class InvalidDNSTypeException extends DNSLookupException {
+public class DNSInvalidTypeException extends DNSLookupException {
 
 	private static final long serialVersionUID = -4538924241638595611L;
 
-	public InvalidDNSTypeException() {
+	public DNSInvalidTypeException() {
 		super();
 	}
 
-	public InvalidDNSTypeException(String message) {
+	public DNSInvalidTypeException(String message) {
 		super(message);
 	}
 
-	public InvalidDNSTypeException(Throwable cause) {
+	public DNSInvalidTypeException(Throwable cause) {
 		super(cause);
 	}
 
-	public InvalidDNSTypeException(String message, Throwable cause) {
+	public DNSInvalidTypeException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

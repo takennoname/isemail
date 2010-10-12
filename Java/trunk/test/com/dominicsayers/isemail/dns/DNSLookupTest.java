@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import com.dominicsayers.isemail.dns.DNSLookup;
 import com.dominicsayers.isemail.dns.DNSLookupException;
-import com.dominicsayers.isemail.dns.InvalidDNSTypeException;
+import com.dominicsayers.isemail.dns.DNSInvalidTypeException;
 
 /**
  * Tests for the class MXLookup.
@@ -25,14 +25,14 @@ public class DNSLookupTest {
 		try {
 			DNSLookup.doLookup("google.de", "");
 			fail();
-		} catch (InvalidDNSTypeException e) {
+		} catch (DNSInvalidTypeException e) {
 			// We expect an InvalidDNSTypeException here
 		}
 
 		try {
 			DNSLookup.doLookup("google.de", "INVALID_DNS_TYPE");
 			fail();
-		} catch (InvalidDNSTypeException e) {
+		} catch (DNSInvalidTypeException e) {
 			// We expect an InvalidDNSTypeException here
 		}
 

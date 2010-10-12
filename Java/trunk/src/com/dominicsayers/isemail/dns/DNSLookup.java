@@ -69,7 +69,7 @@ public class DNSLookup {
 			return -1;
 		} catch (InvalidAttributeIdentifierException e) {
 			// The DNS type is invalid
-			throw new InvalidDNSTypeException(e);
+			throw new DNSInvalidTypeException(e);
 		} catch (NamingException e) {
 			// Unknown reason
 			throw new DNSLookupException(e);
