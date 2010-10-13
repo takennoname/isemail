@@ -1,5 +1,7 @@
 package com.dominicsayers.isemail;
 
+import com.dominicsayers.isemail.smtpcode.SMTPResponse;
+
 /**
  * This enumeration contains all email syntax result values which can be
  * returned by the email syntax validator.

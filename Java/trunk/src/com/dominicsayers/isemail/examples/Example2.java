@@ -52,9 +52,9 @@ public class Example2 {
 		System.out.println("Result String:\t\t" + result.toString());
 		System.out.println("Result Text:\t\t"
 				+ result.getStatusTextExplanatory());
+		System.out.println("SMTP response code:\t" + result.getSmtpResponse().getSmtpCode());
 		System.out.println("ESMTP response code:\t" + result.getSmtpResponse().getEsmtpCode());
-		System.out.println("Old SMTP response code:\t" + result.getSmtpResponse().getOldCode());
-		System.out.println("SMTP response line:\t" + result.getSmtpResponse().toString());
+		System.out.println("SMTP response line:\t" + result.getSmtpResponse().getResponseLine());
 	}
 
 }
