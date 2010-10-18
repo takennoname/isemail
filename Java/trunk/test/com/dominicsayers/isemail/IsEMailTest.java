@@ -129,6 +129,7 @@ public class IsEMailTest {
 		// Now check the XML testcases
 
 		checkXML("test/eMailTests/tests.xml");
+		checkXML("test/eMailTests/tests_beta.xml");
 		// TODO: checkXML("test/eMailTests/tests_alt.xml");
 
 		if (errorCount > 0) {

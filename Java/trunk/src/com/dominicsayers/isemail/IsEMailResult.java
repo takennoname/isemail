@@ -14,9 +14,9 @@ import com.dominicsayers.isemail.smtpcode.SMTPResponse;
  *         Java-Translation 2010 by Daniel Marschall
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @see http://www.dominicsayers.com/isemail
- * @version 2010-10-11.
- *          Java-Translation of is_email_statustext.php:r62 and
- *                              is_email.php:r62
+ * @version 2010-10-18.
+ *          Java-Translation of is_email_statustext.php:r68 and
+ *                              is_email.php:r68
  */
 
 public enum IsEMailResult {

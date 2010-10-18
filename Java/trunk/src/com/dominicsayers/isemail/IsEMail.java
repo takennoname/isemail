@@ -41,7 +41,7 @@ import com.dominicsayers.isemail.dns.DNSLookupException;
  *            Marschall
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link http://www.dominicsayers.com/isemail
- * @version 2010-10-08. Java-Translation of isemail.php:r62.
+ * @version 2010-10-18. Java-Translation of isemail.php:r68.
  */
 
 public class IsEMail {
@@ -406,6 +406,13 @@ public class IsEMail {
 		// (http://tools.ietf.org/html/rfc3696#section-3)
 		// (http://tools.ietf.org/html/rfc5321#section-4.1.3)
 		// (http://tools.ietf.org/html/rfc4291#section-2.2)
+		//
+		// IPv4 is the default format for address literals. Alternative formats
+		// can
+		// be defined. At the time of writing only IPv6 has been defined as an
+		// alternative format. Non-IPv4 formats must be tagged to show what type
+		// of address literal they are. The registry of current tags is here:
+		// http://www.iana.org/assignments/address-literal-tags
 
 		if (PHPFunctions.preg_match("^\\[(.)+]$", domain) == 1) {
 			// It's an address-literal
@@ -422,6 +429,8 @@ public class IsEMail {
 			final String colon = ":"; // Revision 2.7: Daniel Marschall's new
 			// IPv6 testing strategy
 			final String double_colon = "::";
+
+			final String IPv6tag = "IPv6:";
 
 			// Extract IPv4 part from the end of the address-literal (if there
 			// is one)
@@ -444,7 +453,7 @@ public class IsEMail {
 					// preceding IPv4 address must be ':'
 					// revision 2.1: new IPv6 testing strategy
 					if (!PHPFunctions.substr(addressLiteral, 0, 5).equals(
-							"IPv6:")) {
+							IPv6tag)) {
 						// RFC5321 section 4.1.3
 						return IsEMailResult.ISEMAIL_IPV6BADPREFIXMIXED;
 					}
@@ -458,7 +467,7 @@ public class IsEMail {
 				}
 			} else {
 				// It must be an attempt at pure IPv6
-				if (!PHPFunctions.substr(addressLiteral, 0, 5).equals("IPv6:")) {
+				if (!PHPFunctions.substr(addressLiteral, 0, 5).equals(IPv6tag)) {
 					// RFC5321 section 4.1.3
 					return IsEMailResult.ISEMAIL_IPV6BADPREFIX;
 				}

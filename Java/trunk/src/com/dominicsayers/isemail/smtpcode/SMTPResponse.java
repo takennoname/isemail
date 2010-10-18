@@ -5,6 +5,14 @@ package com.dominicsayers.isemail.smtpcode;
  * Contains SMTP status codes used in IsEMail. This list is not complete. Only
  * used entries are listed here as constants.
  * 
+ * These codes assume we are validating a recipient address.
+ * The correct use of reply code 553 is documented in RFCs 821, 2821 & 5321.
+ * http://tools.ietf.org/html/rfc5321#section-4.2
+ * 
+ * The SMTP enhanced status codes (5.1.x) are maintained in the IANA registry
+ * http://www.iana.org/assignments/smtp-enhanced-status-codes
+ * as defined in RFC 5428.
+ * 
  * @author Daniel Marschall
  * @version 2010-10-11
  * 
